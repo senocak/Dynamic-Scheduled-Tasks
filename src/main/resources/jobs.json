@@ -1,0 +1,12 @@
+{
+  "jobs" : [ {
+    "id" : "550e8400-e29b-41d4-a716-446655440001",
+    "name" : "SampleJobOne",
+    "cronExpression" : "0 */3 * * * *",
+    "isRunning" : false,
+    "status" : "COMPLETED",
+    "lastRunTime" : [ 2025, 8, 25, 21, 23, 10, 778982000 ],
+    "nextRunTime" : [ 2025, 8, 25, 21, 26, 11, 782081000 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.SampleJobOne"
+  } ]
+}
