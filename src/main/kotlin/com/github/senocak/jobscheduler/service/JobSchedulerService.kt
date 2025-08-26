@@ -47,19 +47,6 @@ class JobSchedulerService(
                 registerJob(job = jobTask)
             }
         }
-//        jobTaskBeans.forEach { (_: String, job: JobTask) ->
-//            val persistedJob: JobPersistenceDto? = persistedJobs.find { it.className == job::class.java.name }
-//            if (persistedJob != null && persistedJob.enabled) {
-//                job.id = persistedJob.id
-//                job.cronExpression = persistedJob.cronExpression
-//                job.status = persistedJob.status
-//                job.lastRunTime = persistedJob.lastRunTime
-//                job.nextRunTime = persistedJob.nextRunTime
-//                job.enabled = persistedJob.enabled
-//                log.info("Applied persisted configuration for job: ${job::class.java.simpleName}")
-//            }
-//            registerJob(job = job)
-//        }
     }
 
     fun registerJob(job: JobTask) {
@@ -125,14 +112,20 @@ class JobSchedulerService(
 
     fun stopJobById(id: UUID): Boolean {
         val job: JobTask = jobs[id] ?: return false
-        if (!job.isRunning) {
-            log.warn("Job ${job.id} is not running")
+        if (!job.isRunning && scheduledTasks[id] == null) {
+            log.warn("Job ${job.id} is not running and not scheduled")
             return false
         }
+        // Unschedule future executions
+        scheduledTasks[id]?.cancel(false)
+        scheduledTasks.remove(id)
+        // Update runtime state
         job.status = JobStatus.SCHEDULED
         job.isRunning = false
+        job.enabled = false
+        job.nextRunTime = null
         jobPersistenceService.updateJobInFile(job = job)
-        log.info("Stopped job: ${job.id}")
+        log.info("Stopped and unscheduled job: ${job.id}")
         return true
     }
 

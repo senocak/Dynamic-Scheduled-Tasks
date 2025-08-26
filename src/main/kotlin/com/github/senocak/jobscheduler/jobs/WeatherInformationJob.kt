@@ -12,6 +12,7 @@ class WeatherInformationJob(
     private val API_URL = "http://api.weatherstack.com/current"
 
     override fun execute(params: Map<String, Any>?) {
+        Thread.sleep(10_000)
         val location: String = params?.get("location")?.toString() ?: "Istanbul,TR"
         val response: WeatherResponse? = restTemplate.getForObject("$API_URL?access_key=46aa57b9789c0b758c19e10e06fdea04&query=$location",
             WeatherResponse::class.java)

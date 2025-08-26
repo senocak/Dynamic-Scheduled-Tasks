@@ -4,5 +4,6 @@ enum class JobStatus {
     SCHEDULED,
     RUNNING,
     COMPLETED,
-    FAILED
+    FAILED,
+    STOPPED
 }

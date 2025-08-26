@@ -46,3 +46,6 @@ Content-Type: Application/json
     "city": "Istanbul,TR"
   }
 }
+
+### Stop Job by ID for DiskUsageJob
+PUT {{baseUrl}}/jobs/881d188d-ad01-410d-bf65-752f665ef471/stop
