@@ -1,49 +1,20 @@
 package com.github.senocak.jobscheduler.jobs
 
-import com.github.senocak.jobscheduler.logger
-import com.github.senocak.jobscheduler.model.JobStatus
-import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.sql.Timestamp
-import java.time.LocalDateTime
-import java.util.UUID
 
 @Component
 class WeatherInformationJob(
     private val restTemplate: RestTemplate
-): JobTask {
-    private val log: Logger by logger()
-    override val id: UUID = UUID.fromString("550e8400-e29b-41d4-a716-446655440001")
-    override val name: String = "WeatherInformationJob"
-    override var cronExpression: String? = null
-    override var isRunning: Boolean = false
-    override var status: JobStatus = JobStatus.SCHEDULED
-    override var lastRunTime: LocalDateTime? = null
-    override var nextRunTime: LocalDateTime? = null
+): JobTask() {
     private val API_URL = "http://api.weatherstack.com/current"
 
     override fun execute(params: Map<String, Any>?) {
-        isRunning = true
-        status = JobStatus.RUNNING
-        lastRunTime = LocalDateTime.now()
-        val currentTimeMillis: Long = System.currentTimeMillis()
-        val now: String = sdf.format(Timestamp(currentTimeMillis))
-        log.info("Running Job with params: $params, at $now")
-        val location: String = params?.get("location")?.toString() ?: "Istanbul,TR" // Default to Istanbul if no location is specified
-        try {
-            val response: WeatherResponse? = restTemplate.getForObject("$API_URL?access_key=46aa57b9789c0b758c19e10e06fdea04&query=$location",
-                WeatherResponse::class.java)
-            log.info("Weather information for $location: $response")
-            log.info("fireTime: $now, nextFireTime: $nextRunTime, Location: $location, Response:\n$response")
-            Thread.sleep(1_000)
-            status = JobStatus.COMPLETED
-        } catch (e: Exception) {
-            status = JobStatus.FAILED
-            log.error("Job OperatingSystemJob failed: ${e.message}")
-        } finally {
-            isRunning = false
-        }
+        val location: String = params?.get("location")?.toString() ?: "Istanbul,TR"
+        val response: WeatherResponse? = restTemplate.getForObject("$API_URL?access_key=46aa57b9789c0b758c19e10e06fdea04&query=$location",
+            WeatherResponse::class.java)
+        log.info("Weather information for $location: $response")
+
     }
 }
 

@@ -1,12 +1,11 @@
 {
   "jobs" : [ {
-    "id" : "550e8400-e29b-41d4-a716-446655440001",
-    "name" : "OperatingSystemJob",
+    "name" : "operatingSystemJob",
     "cronExpression" : "0 * * * * *",
     "isRunning" : false,
     "status" : "SCHEDULED",
-    "lastRunTime" : [ 2025, 8, 25, 21, 23, 10, 778982000 ],
-    "nextRunTime" : [ 2025, 8, 26, 10, 30, 50, 812013000 ],
+    "lastRunTime" : [ 2025, 8, 26, 11, 48, 40, 518721000 ],
+    "nextRunTime" : [ 2025, 8, 26, 11, 58 ],
     "className" : "com.github.senocak.jobscheduler.jobs.OperatingSystemJob"
   } ]
 }

@@ -26,7 +26,6 @@ class JobPersistenceService {
     private val jobsFilePath = "src/main/resources/$jobsFile"
 
     init {
-        // Configure ObjectMapper for better JSON handling
         objectMapper.findAndRegisterModules()
     }
 
@@ -47,12 +46,11 @@ class JobPersistenceService {
             emptyList()
         }
 
-    fun saveJobsToFile(jobs: List<JobTask>) {
+    fun saveJobsToFile(jobs: Map<String, JobTask>) {
         try {
-            val jobDtos: List<JobPersistenceDto> = jobs.map { job: JobTask ->
+            val jobDtos: List<JobPersistenceDto> = jobs.map { (beanName: String, job: JobTask) ->
                 JobPersistenceDto(
-                    id = job.id.toString(),
-                    name = job.name,
+                    name = beanName,
                     cronExpression = job.cronExpression,
                     isRunning = job.isRunning,
                     status = job.status,
@@ -63,11 +61,8 @@ class JobPersistenceService {
             }
             val jobsFileDto = JobsFileDto(jobs = jobDtos)
             val jsonContent: String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jobsFileDto)
-            
-            // Ensure the directory exists
             val file = File(jobsFilePath)
             file.parentFile?.mkdirs()
-            
             Files.write(Paths.get(jobsFilePath), jsonContent.toByteArray())
             log.info("Saved ${jobDtos.size} jobs to file: $jobsFilePath")
         } catch (e: Exception) {
@@ -75,15 +70,13 @@ class JobPersistenceService {
         }
     }
 
-    fun updateJobInFile(job: JobTask) {
+    fun updateJobInFile(beanName: String, job: JobTask) {
         try {
             val existingJobs: MutableList<JobPersistenceDto> = loadJobsFromResources().toMutableList()
-            // Find and update the job
-            val jobIndex: Int = existingJobs.indexOfFirst { it.id == job.id.toString() }
+            val jobIndex: Int = existingJobs.indexOfFirst { it.name == beanName }
             if (jobIndex != -1) {
                 existingJobs[jobIndex] = JobPersistenceDto(
-                    id = job.id.toString(),
-                    name = job.name,
+                    name = beanName,
                     cronExpression = job.cronExpression,
                     isRunning = job.isRunning,
                     status = job.status,
@@ -92,10 +85,8 @@ class JobPersistenceService {
                     className = job::class.java.name
                 )
             } else {
-                // Add new job if not found
                 existingJobs.add(JobPersistenceDto(
-                    id = job.id.toString(),
-                    name = job.name,
+                    name = beanName,
                     cronExpression = job.cronExpression,
                     isRunning = job.isRunning,
                     status = job.status,
@@ -104,33 +95,27 @@ class JobPersistenceService {
                     className = job::class.java.name
                 ))
             }
-            
             val jobsFileDto = JobsFileDto(jobs = existingJobs)
             val jsonContent: String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jobsFileDto)
-            
             val file = File(jobsFilePath)
             file.parentFile?.mkdirs()
             Files.write(Paths.get(jobsFilePath), jsonContent.toByteArray())
-            
-            log.info("Updated job ${job.name} in file: $jobsFilePath")
+            log.info("Updated job $beanName in file: $jobsFilePath")
         } catch (e: Exception) {
             log.error("Failed to update job in file: ${e.message}", e)
         }
     }
 
-    fun removeJobFromFile(jobId: String) {
+    fun removeJobFromFile(jobName: String) {
         try {
             val existingJobs: MutableList<JobPersistenceDto> = loadJobsFromResources().toMutableList()
-            existingJobs.removeAll { it.id == jobId }
-            
+            existingJobs.removeAll { it.name == jobName }
             val jobsFileDto = JobsFileDto(jobs = existingJobs)
             val jsonContent: String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jobsFileDto)
-            
             val file = File(jobsFilePath)
             file.parentFile?.mkdirs()
             Files.write(Paths.get(jobsFilePath), jsonContent.toByteArray())
-            
-            log.info("Removed job $jobId from file: $jobsFilePath")
+            log.info("Removed job $jobName from file: $jobsFilePath")
         } catch (e: Exception) {
             log.error("Failed to remove job from file: ${e.message}", e)
         }
