@@ -57,7 +57,8 @@ class JobPersistenceService {
                     status = job.status,
                     lastRunTime = job.lastRunTime,
                     nextRunTime = job.nextRunTime,
-                    className = job::class.java.name
+                    className = job::class.java.name,
+                    enabled = job.enabled,
                 )
             }
             val jobsFileDto = JobsFileDto(jobs = jobDtos)
@@ -83,7 +84,8 @@ class JobPersistenceService {
                     status = job.status,
                     lastRunTime = job.lastRunTime,
                     nextRunTime = job.nextRunTime,
-                    className = job::class.java.name
+                    className = job::class.java.name,
+                    enabled = job.enabled,
                 )
             } else {
                 existingJobs.add(JobPersistenceDto(
@@ -93,7 +95,8 @@ class JobPersistenceService {
                     status = job.status,
                     lastRunTime = job.lastRunTime,
                     nextRunTime = job.nextRunTime,
-                    className = job::class.java.name
+                    className = job::class.java.name,
+                    enabled = job.enabled,
                 ))
             }
             val jobsFileDto = JobsFileDto(jobs = existingJobs)

@@ -13,7 +13,8 @@ data class JobPersistenceDto(
     val lastRunTime: LocalDateTime?,
     val nextRunTime: LocalDateTime?,
     @JsonProperty("className")
-    val className: String
+    val className: String,
+    val enabled: Boolean
 )
 
 data class JobsFileDto(

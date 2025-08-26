@@ -15,6 +15,7 @@ class OperatingSystemJob : JobTask() {
     private val tb: Long = gb * 1000
 
     override fun execute(params: Map<String, Any>?) {
+        Thread.sleep(20_000)
         val runtime: Runtime = Runtime.getRuntime()
         val performance = Performance(
             timestamp = System.currentTimeMillis(),
@@ -30,7 +31,6 @@ class OperatingSystemJob : JobTask() {
             maxMemory = toHumanReadableSIPrefixes(size = runtime.maxMemory()),
             freeMemory = toHumanReadableSIPrefixes(size = runtime.freeMemory())
         )
-        Thread.sleep(20_000)
         log.info("Performance:\n$performance")
     }
 

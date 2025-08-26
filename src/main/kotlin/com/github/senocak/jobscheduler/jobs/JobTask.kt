@@ -3,7 +3,6 @@ package com.github.senocak.jobscheduler.jobs
 import com.github.senocak.jobscheduler.logger
 import com.github.senocak.jobscheduler.model.JobStatus
 import org.slf4j.Logger
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -15,6 +14,7 @@ abstract class JobTask {
     open var status: JobStatus = JobStatus.SCHEDULED
     open var lastRunTime: LocalDateTime? = null
     open var nextRunTime: LocalDateTime? = null
+    open var enabled: Boolean = false
 
     protected abstract fun execute(params: Map<String, Any>? = null)
 

@@ -5,7 +5,17 @@
     "isRunning" : false,
     "status" : "SCHEDULED",
     "lastRunTime" : [ 2025, 8, 26, 12, 51, 0, 2440000 ],
-    "nextRunTime" : [ 2025, 8, 26, 12, 56 ],
-    "className" : "com.github.senocak.jobscheduler.jobs.OperatingSystemJob"
+    "nextRunTime" : [ 2025, 8, 26, 13, 4 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.OperatingSystemJob",
+    "enabled" : true
+  }, {
+    "id" : "881d188d-ad01-410d-bf65-752f665ef472",
+    "cronExpression" : "0 */2 * * * *",
+    "isRunning" : false,
+    "status" : "SCHEDULED",
+    "lastRunTime" : [ 2025, 8, 26, 12, 51, 0, 2440000 ],
+    "nextRunTime" : [ 2025, 8, 26, 13, 2 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.DiskUsageJob",
+    "enabled" : true
   } ]
 }

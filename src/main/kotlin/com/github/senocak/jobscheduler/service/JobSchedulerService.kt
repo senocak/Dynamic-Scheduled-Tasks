@@ -36,12 +36,13 @@ class JobSchedulerService(
         val jobTaskBeans: Map<String, JobTask> = applicationContext.getBeansOfType(JobTask::class.java)
         jobTaskBeans.forEach { (_: String, job: JobTask) ->
             val persistedJob: JobPersistenceDto? = persistedJobs.find { it.className == job::class.java.name }
-            if (persistedJob != null) {
+            if (persistedJob != null && persistedJob.enabled) {
                 job.id = persistedJob.id
                 job.cronExpression = persistedJob.cronExpression
                 job.status = persistedJob.status
                 job.lastRunTime = persistedJob.lastRunTime
                 job.nextRunTime = persistedJob.nextRunTime
+                job.enabled = true
                 log.info("Applied persisted configuration for job: ${job::class.java.simpleName}")
                 registerJob(job = job)
             }
