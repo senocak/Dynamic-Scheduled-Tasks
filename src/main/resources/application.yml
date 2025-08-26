@@ -1,0 +1,19 @@
+# Server configuration
+server:
+  port: 8080
+
+# Logging configuration
+logging:
+  level:
+    com:
+      example:
+        jobscheduler: INFO
+    org:
+      springframework:
+        scheduling: DEBUG
+
+# Jackson configuration for Kotlin
+spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
