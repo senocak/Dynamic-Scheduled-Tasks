@@ -1,7 +1,9 @@
-package com.github.senocak.jobscheduler.model
+package com.github.senocak.jobscheduler.jobs
 
+import com.github.senocak.jobscheduler.model.JobStatus
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 interface JobTask {
     val id: UUID
@@ -11,6 +13,9 @@ interface JobTask {
     var status: JobStatus
     var lastRunTime: LocalDateTime?
     var nextRunTime: LocalDateTime?
-    
+
     fun execute(params: Map<String, Any>? = null)
+
+    val sdf: SimpleDateFormat
+        get() = SimpleDateFormat("yyyy.MM.dd.HH.mm.ss")
 }

@@ -1,9 +1,9 @@
 package com.github.senocak.jobscheduler.service
 
-import com.example.jobscheduler.dto.JobPersistenceDto
-import com.example.jobscheduler.dto.JobsFileDto
-import com.example.jobscheduler.logger
-import com.example.jobscheduler.model.JobTask
+import com.github.senocak.jobscheduler.dto.JobPersistenceDto
+import com.github.senocak.jobscheduler.dto.JobsFileDto
+import com.github.senocak.jobscheduler.logger
+import com.github.senocak.jobscheduler.jobs.JobTask
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule

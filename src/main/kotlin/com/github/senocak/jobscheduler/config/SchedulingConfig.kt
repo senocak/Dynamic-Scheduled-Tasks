@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
+import org.springframework.web.client.RestTemplate
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 
@@ -22,4 +23,9 @@ class SchedulingConfig {
     @Bean
     fun scheduledExecutorService(): ScheduledExecutorService =
         Executors.newScheduledThreadPool(10)
+
+
+
+    @Bean
+    fun restTemplate(): RestTemplate = RestTemplate()
 }

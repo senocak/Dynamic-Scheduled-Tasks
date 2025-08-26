@@ -1,8 +1,8 @@
 package com.github.senocak.jobscheduler.dto
 
-import com.example.jobscheduler.model.JobStatus
+import com.github.senocak.jobscheduler.model.JobStatus
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class JobStartRequest(
     val params: Map<String, Any>? = null
@@ -10,6 +10,7 @@ data class JobStartRequest(
 
 data class JobUpdateRequest(
     val cronExpression: String? = null,
+    val triggerType: String? = null,
     val name: String? = null
 )
 
@@ -21,4 +22,10 @@ data class JobResponse(
     val status: JobStatus,
     val lastRunTime: LocalDateTime?,
     val nextRunTime: LocalDateTime?
+)
+
+data class TriggerTypeResponse(
+    val displayName: String,
+    val cronExpression: String,
+    val description: String
 )

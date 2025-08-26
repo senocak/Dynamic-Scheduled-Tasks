@@ -3,6 +3,7 @@ package com.github.senocak.jobscheduler.controller
 import com.github.senocak.jobscheduler.dto.JobResponse
 import com.github.senocak.jobscheduler.dto.JobStartRequest
 import com.github.senocak.jobscheduler.dto.JobUpdateRequest
+import com.github.senocak.jobscheduler.dto.TriggerTypeResponse
 import com.github.senocak.jobscheduler.service.JobSchedulerService
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.RequestMapping
@@ -45,7 +46,7 @@ class JobController(
     @PutMapping(value = ["/{id}"])
     fun updateJob(@PathVariable id: UUID, @RequestBody request: JobUpdateRequest): Map<String, Any> =
         when {
-            jobSchedulerService.updateJob(id = id, cronExpression = request.cronExpression, name = request.name) ->
+            jobSchedulerService.updateJob(id = id, cronExpression = request.cronExpression, triggerType = request.triggerType, name = request.name) ->
                 mapOf("message" to "Job updated successfully", "jobId" to id)
             else -> mapOf("error" to "Failed to update job", "jobId" to id)
         }
@@ -62,4 +63,8 @@ class JobController(
         jobSchedulerService.saveAllJobs()
         return mapOf("message" to "All jobs saved to file successfully")
     }
+
+    @GetMapping(value = ["/triggers"])
+    fun getAvailableTriggerTypes(): List<TriggerTypeResponse> =
+        jobSchedulerService.getAvailableTriggerTypes()
 }

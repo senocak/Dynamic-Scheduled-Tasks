@@ -1,10 +1,12 @@
 package com.github.senocak.jobscheduler.service
 
-import com.example.jobscheduler.dto.JobPersistenceDto
-import com.example.jobscheduler.dto.JobResponse
-import com.example.jobscheduler.logger
-import com.example.jobscheduler.model.JobStatus
-import com.example.jobscheduler.model.JobTask
+import com.github.senocak.jobscheduler.dto.JobPersistenceDto
+import com.github.senocak.jobscheduler.dto.JobResponse
+import com.github.senocak.jobscheduler.dto.TriggerTypeResponse
+import com.github.senocak.jobscheduler.logger
+import com.github.senocak.jobscheduler.model.JobStatus
+import com.github.senocak.jobscheduler.jobs.JobTask
+import com.github.senocak.jobscheduler.model.TriggerType
 import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
 import org.springframework.context.ApplicationContext
@@ -46,8 +48,8 @@ class JobSchedulerService(
                 job.lastRunTime = persistedJob.lastRunTime
                 job.nextRunTime = persistedJob.nextRunTime
                 log.info("Applied persisted configuration for job: ${job.name}")
+                registerJob(job = job)
             }
-            registerJob(job = job)
         }
         log.info("Registered ${jobs.size} jobs")
     }
@@ -132,28 +134,48 @@ class JobSchedulerService(
         return true
     }
 
-    fun updateJob(id: UUID, cronExpression: String?, name: String?): Boolean {
+    fun updateJob(id: UUID, cronExpression: String?, triggerType: String?, name: String?): Boolean {
         val job: JobTask = jobs[id] ?: return false
+        // Determine the cron expression to use
+        val finalCronExpression: String? = when {
+            triggerType != null -> {
+                val trigger: TriggerType? = TriggerType.fromDisplayName(displayName = triggerType)
+                when {
+                    trigger != null && trigger != TriggerType.CUSTOM -> trigger.cronExpression
+                    else -> cronExpression
+                }
+            }
+            else -> cronExpression
+        }
         
         // Handle cron expression update
-        if (cronExpression != job.cronExpression) {
+        if (finalCronExpression != job.cronExpression) {
             // Cancel existing scheduled task if any
             scheduledTasks[id]?.cancel(false)
             scheduledTasks.remove(id)
             
             // Update cron expression
-            job.cronExpression = cronExpression
+            job.cronExpression = finalCronExpression
             
             // Schedule new task if cron expression is provided
-            cronExpression?.let { scheduleJob(job = job, cronExpression = it) }
+            finalCronExpression?.let { scheduleJob(job = job, cronExpression = it) }
         }
         
         // Persist job configuration
         jobPersistenceService.updateJobInFile(job = job)
         
-        log.info("Updated job: ${job.name}")
+        log.info("Updated job: ${job.name} with cron: $finalCronExpression")
         return true
     }
+
+    fun getAvailableTriggerTypes(): List<TriggerTypeResponse> =
+        TriggerType.getPredefinedTriggers().map { triggerType: TriggerType ->
+            TriggerTypeResponse(
+                displayName = triggerType.displayName,
+                cronExpression = triggerType.cronExpression,
+                description = triggerType.description
+            )
+        }
 
     fun removeJob(id: UUID): Boolean {
         val job: JobTask = jobs.remove(id) ?: return false

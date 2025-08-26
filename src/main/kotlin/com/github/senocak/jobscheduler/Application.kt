@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 class Application
 
 fun main(args: Array<String>) {
-    runApplication<com.github.senocak.jobscheduler.Application>(*args)
+    runApplication<Application>(*args)
 }
 
 fun <R : Any> R.logger(): Lazy<Logger> = lazy {

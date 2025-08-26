@@ -1,6 +1,6 @@
 package com.github.senocak.jobscheduler.dto
 
-import com.example.jobscheduler.model.JobStatus
+import com.github.senocak.jobscheduler.model.JobStatus
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 import java.util.*
