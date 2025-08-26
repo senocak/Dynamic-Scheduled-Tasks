@@ -1,8 +1,10 @@
 package com.github.senocak.jobscheduler.jobs
 
+import com.github.senocak.jobscheduler.dto.JobLogEntry
 import org.springframework.stereotype.Component
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.LocalDateTime
 
 @Component
 class HttpMonitorJob: JobTask() {
@@ -26,6 +28,7 @@ class HttpMonitorJob: JobTask() {
                 append(" - WARNING: Non-successful status code")
             }
         }
+        logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = message))
         log.info("Monitoring Result: $message")
     }
 }

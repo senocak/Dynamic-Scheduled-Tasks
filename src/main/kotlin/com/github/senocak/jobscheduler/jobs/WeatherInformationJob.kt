@@ -1,7 +1,9 @@
 package com.github.senocak.jobscheduler.jobs
 
+import com.github.senocak.jobscheduler.dto.JobLogEntry
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import java.time.LocalDateTime
 
 @Component
 class WeatherInformationJob(
@@ -14,6 +16,7 @@ class WeatherInformationJob(
         val response: WeatherResponse? = restTemplate.getForObject("$API_URL?access_key=46aa57b9789c0b758c19e10e06fdea04&query=$location",
             WeatherResponse::class.java)
         log.info("Weather information for $location: $response")
+        logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = response.toString()))
     }
 }
 

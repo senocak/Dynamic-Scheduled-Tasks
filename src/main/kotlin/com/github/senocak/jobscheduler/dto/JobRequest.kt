@@ -1,7 +1,6 @@
 package com.github.senocak.jobscheduler.dto
 
 import com.github.senocak.jobscheduler.model.JobStatus
-import jdk.jfr.Enabled
 import java.time.LocalDateTime
 
 data class JobStartRequest(
@@ -21,7 +20,8 @@ data class JobResponse(
     val status: JobStatus,
     val lastRunTime: LocalDateTime?,
     val nextRunTime: LocalDateTime?,
-    val enabled: Boolean
+    val enabled: Boolean,
+    val logs: MutableList<JobLogEntry> = mutableListOf()
 )
 
 data class TriggerTypeResponse(

@@ -1,9 +1,11 @@
 package com.github.senocak.jobscheduler.jobs
 
+import com.github.senocak.jobscheduler.dto.JobLogEntry
 import org.springframework.stereotype.Component
 import java.text.DecimalFormat
 import com.sun.management.OperatingSystemMXBean
 import java.lang.management.ManagementFactory
+import java.time.LocalDateTime
 
 @Component
 class OperatingSystemJob : JobTask() {
@@ -32,6 +34,7 @@ class OperatingSystemJob : JobTask() {
             freeMemory = toHumanReadableSIPrefixes(size = runtime.freeMemory())
         )
         log.info("Performance:\n$performance")
+        logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = performance.toString()))
     }
 
     private fun toHumanReadableSIPrefixes(size: Long): String =

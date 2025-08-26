@@ -5,6 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 import java.util.UUID
 
+data class JobLogEntry(
+    val timestamp: LocalDateTime,
+    val level: String,
+    val message: String
+)
+
 data class JobPersistenceDto(
     val id: UUID,
     val cronExpression: String?,
@@ -14,7 +20,8 @@ data class JobPersistenceDto(
     val nextRunTime: LocalDateTime?,
     @JsonProperty("className")
     val className: String,
-    val enabled: Boolean
+    val enabled: Boolean,
+    val logs: List<JobLogEntry> = emptyList()
 )
 
 data class JobsFileDto(

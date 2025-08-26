@@ -1,5 +1,6 @@
 package com.github.senocak.jobscheduler.jobs
 
+import com.github.senocak.jobscheduler.dto.JobLogEntry
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -7,6 +8,7 @@ import org.jsoup.select.Elements
 import org.springframework.stereotype.Component
 import java.lang.Thread.sleep
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 import java.time.Month
 import java.util.Date
 
@@ -45,6 +47,7 @@ class TarihteBugunJob : JobTask() {
                 }
         }
         log.info("Response:\n$dataMap")
+        logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = dataMap.toString()))
     }
 
     private fun ayAdi(ay: Int): String =

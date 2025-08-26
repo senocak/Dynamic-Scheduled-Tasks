@@ -83,7 +83,8 @@ class JobSchedulerService(
                 status = job.status,
                 lastRunTime = job.lastRunTime,
                 nextRunTime = job.nextRunTime,
-                enabled = job.enabled
+                enabled = job.enabled,
+                logs = job.logs
             )
         }
 
@@ -97,7 +98,8 @@ class JobSchedulerService(
             status = job.status,
             lastRunTime = job.lastRunTime,
             nextRunTime = job.nextRunTime,
-            enabled = job.enabled
+            enabled = job.enabled,
+            logs = job.logs
         )
     }
 

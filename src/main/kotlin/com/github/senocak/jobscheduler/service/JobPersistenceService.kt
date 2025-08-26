@@ -1,5 +1,6 @@
 package com.github.senocak.jobscheduler.service
 
+import com.github.senocak.jobscheduler.dto.JobLogEntry
 import com.github.senocak.jobscheduler.dto.JobPersistenceDto
 import com.github.senocak.jobscheduler.dto.JobsFileDto
 import com.github.senocak.jobscheduler.logger
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -47,6 +49,12 @@ class JobPersistenceService {
             emptyList()
         }
 
+    private fun mapLogs(job: JobTask): List<JobLogEntry> =
+        job.logs.map { (ts: LocalDateTime, msg: String) ->
+            val level: String = if (msg.startsWith(prefix = "FAILED")) "ERROR" else "INFO"
+            JobLogEntry(timestamp = ts, level = level, message = msg)
+        }
+
     fun saveJobsToFile(jobs: Map<String, JobTask>) {
         try {
             val jobDtos: List<JobPersistenceDto> = jobs.map { (_: String, job: JobTask) ->
@@ -59,6 +67,7 @@ class JobPersistenceService {
                     nextRunTime = job.nextRunTime,
                     className = job::class.java.name,
                     enabled = job.enabled,
+                    logs = mapLogs(job = job)
                 )
             }
             val jobsFileDto = JobsFileDto(jobs = jobDtos)
@@ -86,6 +95,7 @@ class JobPersistenceService {
                     nextRunTime = job.nextRunTime,
                     className = job::class.java.name,
                     enabled = job.enabled,
+                    logs = mapLogs(job)
                 )
             } else {
                 existingJobs.add(JobPersistenceDto(
@@ -97,6 +107,7 @@ class JobPersistenceService {
                     nextRunTime = job.nextRunTime,
                     className = job::class.java.name,
                     enabled = job.enabled,
+                    logs = mapLogs(job)
                 ))
             }
             val jobsFileDto = JobsFileDto(jobs = existingJobs)
