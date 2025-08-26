@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.UUID
 
 @Service
 class JobPersistenceService {
@@ -48,9 +49,9 @@ class JobPersistenceService {
 
     fun saveJobsToFile(jobs: Map<String, JobTask>) {
         try {
-            val jobDtos: List<JobPersistenceDto> = jobs.map { (beanName: String, job: JobTask) ->
+            val jobDtos: List<JobPersistenceDto> = jobs.map { (_: String, job: JobTask) ->
                 JobPersistenceDto(
-                    name = beanName,
+                    id = job.id,
                     cronExpression = job.cronExpression,
                     isRunning = job.isRunning,
                     status = job.status,
@@ -70,13 +71,13 @@ class JobPersistenceService {
         }
     }
 
-    fun updateJobInFile(beanName: String, job: JobTask) {
+    fun updateJobInFile(job: JobTask) {
         try {
             val existingJobs: MutableList<JobPersistenceDto> = loadJobsFromResources().toMutableList()
-            val jobIndex: Int = existingJobs.indexOfFirst { it.name == beanName }
+            val jobIndex: Int = existingJobs.indexOfFirst { it.id == job.id }
             if (jobIndex != -1) {
                 existingJobs[jobIndex] = JobPersistenceDto(
-                    name = beanName,
+                    id = job.id,
                     cronExpression = job.cronExpression,
                     isRunning = job.isRunning,
                     status = job.status,
@@ -86,7 +87,7 @@ class JobPersistenceService {
                 )
             } else {
                 existingJobs.add(JobPersistenceDto(
-                    name = beanName,
+                    id = job.id,
                     cronExpression = job.cronExpression,
                     isRunning = job.isRunning,
                     status = job.status,
@@ -100,22 +101,22 @@ class JobPersistenceService {
             val file = File(jobsFilePath)
             file.parentFile?.mkdirs()
             Files.write(Paths.get(jobsFilePath), jsonContent.toByteArray())
-            log.info("Updated job $beanName in file: $jobsFilePath")
+            log.info("Updated job $job in file: $jobsFilePath")
         } catch (e: Exception) {
             log.error("Failed to update job in file: ${e.message}", e)
         }
     }
 
-    fun removeJobFromFile(jobName: String) {
+    fun removeJobFromFile(id: UUID) {
         try {
             val existingJobs: MutableList<JobPersistenceDto> = loadJobsFromResources().toMutableList()
-            existingJobs.removeAll { it.name == jobName }
+            existingJobs.removeAll { it.id == id }
             val jobsFileDto = JobsFileDto(jobs = existingJobs)
             val jsonContent: String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jobsFileDto)
             val file = File(jobsFilePath)
             file.parentFile?.mkdirs()
             Files.write(Paths.get(jobsFilePath), jsonContent.toByteArray())
-            log.info("Removed job $jobName from file: $jobsFilePath")
+            log.info("Removed job $id from file: $jobsFilePath")
         } catch (e: Exception) {
             log.error("Failed to remove job from file: ${e.message}", e)
         }

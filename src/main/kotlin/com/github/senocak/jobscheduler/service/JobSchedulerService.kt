@@ -15,9 +15,9 @@ import org.springframework.scheduling.support.CronExpression
 import org.springframework.scheduling.support.CronTrigger
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ScheduledFuture
-
 
 @Service
 class JobSchedulerService(
@@ -26,41 +26,42 @@ class JobSchedulerService(
     private val jobPersistenceService: JobPersistenceService
 ) {
     private val log: Logger by logger()
-    private val jobs: ConcurrentHashMap<String, JobTask> = ConcurrentHashMap()
-    private val scheduledTasks: ConcurrentHashMap<String, ScheduledFuture<*>> = ConcurrentHashMap()
+    private val jobs: ConcurrentHashMap<UUID, JobTask> = ConcurrentHashMap()
+    private val scheduledTasks: ConcurrentHashMap<UUID, ScheduledFuture<*>> = ConcurrentHashMap()
 
     @PostConstruct
     fun initializeJobs() {
         log.info("Initializing job scheduler...")
         val persistedJobs: List<JobPersistenceDto> = jobPersistenceService.loadJobsFromResources()
         val jobTaskBeans: Map<String, JobTask> = applicationContext.getBeansOfType(JobTask::class.java)
-        jobTaskBeans.forEach { (beanName: String, job: JobTask) ->
+        jobTaskBeans.forEach { (_: String, job: JobTask) ->
             val persistedJob: JobPersistenceDto? = persistedJobs.find { it.className == job::class.java.name }
             if (persistedJob != null) {
+                job.id = persistedJob.id
                 job.cronExpression = persistedJob.cronExpression
                 job.status = persistedJob.status
                 job.lastRunTime = persistedJob.lastRunTime
                 job.nextRunTime = persistedJob.nextRunTime
-                log.info("Applied persisted configuration for job: $beanName")
-                registerJob(beanName = beanName, job = job)
+                log.info("Applied persisted configuration for job: ${job::class.java.simpleName}")
+                registerJob(job = job)
             }
         }
-        log.info("Registered ${jobs.size} jobs")
     }
 
-    fun registerJob(beanName: String, job: JobTask) {
-        jobs[beanName] = job
+    fun registerJob(job: JobTask) {
+        jobs[job.id] = job
         job.cronExpression?.let { cronExpression: String ->
-            scheduleJob(beanName = beanName, job = job, cronExpression = cronExpression)
+            scheduleJob(jobId = job.id, job = job, cronExpression = cronExpression)
         }
-        jobPersistenceService.updateJobInFile(beanName = beanName, job = job)
-        log.info("Registered job: $beanName")
+        jobPersistenceService.updateJobInFile(job = job)
+        log.info("Registered job: ${job::class.java.simpleName} with id: ${job.id}")
     }
 
     fun getAllJobs(): List<JobResponse> =
-        jobs.map { (beanName: String, job: JobTask) ->
+        jobs.map { (id: UUID, job: JobTask) ->
+            val simpleName: String = job::class.java.simpleName
             JobResponse(
-                name = beanName,
+                name = "$simpleName:$id",
                 cronExpression = job.cronExpression,
                 isRunning = job.isRunning,
                 status = job.status,
@@ -69,10 +70,11 @@ class JobSchedulerService(
             )
         }
 
-    fun getJob(name: String): JobResponse? {
-        val job: JobTask = jobs[name] ?: return null
+    fun getJobById(id: UUID): JobResponse? {
+        val job: JobTask = jobs[id] ?: return null
+        val simpleName: String = job::class.java.simpleName
         return JobResponse(
-            name = name,
+            name = "$simpleName:${job.id}",
             cronExpression = job.cronExpression,
             isRunning = job.isRunning,
             status = job.status,
@@ -81,39 +83,41 @@ class JobSchedulerService(
         )
     }
 
-    fun startJob(name: String, params: Map<String, Any>? = null): Boolean {
-        val job: JobTask = jobs[name] ?: return false
+    fun startJobById(id: UUID, params: Map<String, Any>? = null): Boolean {
+        val job: JobTask = jobs[id] ?: return false
         if (job.isRunning) {
-            log.warn("Job $name is already running")
+            log.warn("Job ${job.id} is already running")
             return false
         }
         return try {
+            jobPersistenceService.updateJobInFile(job = job)
             job.executes(params = params)
             job.cronExpression?.let { cronExpression: String ->
                 calculateNextRunTime(job = job, cronExpression = cronExpression)
             }
-            jobPersistenceService.updateJobInFile(beanName = name, job = job)
+            jobPersistenceService.updateJobInFile(job = job)
             true
         } catch (e: Exception) {
-            log.error("Failed to start job $name: ${e.message}", e)
+            log.error("Failed to start job ${job.id}: ${e.message}", e)
             false
         }
     }
 
-    fun stopJob(name: String): Boolean {
-        val job: JobTask = jobs[name] ?: return false
+    fun stopJobById(id: UUID): Boolean {
+        val job: JobTask = jobs[id] ?: return false
         if (!job.isRunning) {
-            log.warn("Job $name is not running")
+            log.warn("Job ${job.id} is not running")
             return false
         }
         job.status = JobStatus.SCHEDULED
         job.isRunning = false
-        log.info("Stopped job: $name")
+        jobPersistenceService.updateJobInFile(job = job)
+        log.info("Stopped job: ${job.id}")
         return true
     }
 
-    fun updateJob(name: String, cronExpression: String?, triggerType: String?, newName: String?): Boolean {
-        val job: JobTask = jobs[name] ?: return false
+    fun updateJobById(id: UUID, cronExpression: String?, triggerType: String?, newName: String?): Boolean {
+        val job: JobTask = jobs[id] ?: return false
         val finalCronExpression: String? = when {
             triggerType != null -> {
                 val trigger: TriggerType? = TriggerType.fromDisplayName(displayName = triggerType)
@@ -125,13 +129,13 @@ class JobSchedulerService(
             else -> cronExpression
         }
         if (finalCronExpression != job.cronExpression) {
-            scheduledTasks[name]?.cancel(false)
-            scheduledTasks.remove(name)
+            scheduledTasks[id]?.cancel(false)
+            scheduledTasks.remove(id)
             job.cronExpression = finalCronExpression
-            finalCronExpression?.let { scheduleJob(beanName = name, job = job, cronExpression = it) }
+            finalCronExpression?.let { scheduleJob(jobId = id, job = job, cronExpression = it) }
         }
-        jobPersistenceService.updateJobInFile(beanName = name, job = job)
-        log.info("Updated job: $name with cron: $finalCronExpression")
+        jobPersistenceService.updateJobInFile(job = job)
+        log.info("Updated job: ${job.id} with cron: $finalCronExpression")
         return true
     }
 
@@ -144,20 +148,23 @@ class JobSchedulerService(
             )
         }
 
-    fun removeJob(name: String): Boolean {
-        val job: JobTask = jobs.remove(name) ?: return false
-        scheduledTasks[name]?.cancel(false)
-        scheduledTasks.remove(name)
-        jobPersistenceService.removeJobFromFile(jobName = name)
-        log.info("Removed job: $name")
+    fun removeJobById(id: UUID): Boolean {
+        val job: JobTask = jobs.remove(id) ?: return false
+        scheduledTasks[id]?.cancel(false)
+        scheduledTasks.remove(id)
+        jobPersistenceService.removeJobFromFile(id = id)
+        jobPersistenceService.updateJobInFile(job = job)
+        log.info("Removed job: ${job.id}")
         return true
     }
 
     fun saveAllJobs() {
-        jobPersistenceService.saveJobsToFile(jobs)
+        // Convert to a map keyed by a synthetic name for persistence if needed; here only ids are used in DTO
+        val mapForPersistence: Map<String, JobTask> = jobs.mapKeys { (id: UUID, _): Map.Entry<UUID, JobTask> -> id.toString() }
+        jobPersistenceService.saveJobsToFile(mapForPersistence)
     }
 
-    private fun scheduleJob(beanName: String, job: JobTask, cronExpression: String) {
+    private fun scheduleJob(jobId: UUID, job: JobTask, cronExpression: String) {
         try {
             val scheduledTask: ScheduledFuture<*>? = taskScheduler.schedule(
                 {
@@ -165,18 +172,18 @@ class JobSchedulerService(
                         job.executes()
                         calculateNextRunTime(job = job, cronExpression = cronExpression)
                     } catch (e: Exception) {
-                        log.error("Scheduled job $beanName failed: ${e.message}", e)
+                        log.error("Scheduled job $jobId failed: ${e.message}", e)
                         job.status = JobStatus.FAILED
                     }
                 },
                 CronTrigger(cronExpression)
             )
-            scheduledTasks[beanName] = scheduledTask as ScheduledFuture<*>
+            scheduledTasks[jobId] = scheduledTask as ScheduledFuture<*>
             job.status = JobStatus.SCHEDULED
             calculateNextRunTime(job = job, cronExpression = cronExpression)
-            log.info("Scheduled job $beanName with cron: $cronExpression, next run: ${job.nextRunTime}")
+            log.info("Scheduled job $jobId with cron: $cronExpression, next run: ${job.nextRunTime}")
         } catch (e: Exception) {
-            log.error("Failed to schedule job $beanName with cron $cronExpression: ${e.message}", e)
+            log.error("Failed to schedule job $jobId with cron $cronExpression: ${e.message}", e)
         }
     }
 

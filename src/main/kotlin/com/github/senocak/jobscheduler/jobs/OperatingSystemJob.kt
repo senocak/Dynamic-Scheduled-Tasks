@@ -30,8 +30,8 @@ class OperatingSystemJob : JobTask() {
             maxMemory = toHumanReadableSIPrefixes(size = runtime.maxMemory()),
             freeMemory = toHumanReadableSIPrefixes(size = runtime.freeMemory())
         )
+        Thread.sleep(20_000)
         log.info("Performance:\n$performance")
-
     }
 
     private fun toHumanReadableSIPrefixes(size: Long): String =

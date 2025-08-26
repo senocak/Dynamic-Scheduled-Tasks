@@ -14,7 +14,6 @@ class WeatherInformationJob(
         val response: WeatherResponse? = restTemplate.getForObject("$API_URL?access_key=46aa57b9789c0b758c19e10e06fdea04&query=$location",
             WeatherResponse::class.java)
         log.info("Weather information for $location: $response")
-
     }
 }
 

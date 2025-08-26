@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
+import java.util.UUID
 
 @RestController
 @RequestMapping(value = ["/jobs"])
@@ -23,38 +24,38 @@ class JobController(
     fun getAllJobs(): List<JobResponse> =
         jobSchedulerService.getAllJobs()
 
-    @GetMapping(value = ["/{name}"])
-    fun getJob(@PathVariable name: String): JobResponse =
-        jobSchedulerService.getJob(name = name) ?: throw NoSuchElementException("Job with name $name not found")
+    @GetMapping(value = ["/{id}"])
+    fun getJob(@PathVariable id: UUID): JobResponse =
+        jobSchedulerService.getJobById(id = id) ?: throw NoSuchElementException("Job with id $id not found")
 
-    @PutMapping(value = ["/{name}/start"])
-    fun startJob(@PathVariable name: String, @RequestBody(required = false) request: JobStartRequest?): Map<String, Any> =
+    @PutMapping(value = ["/{id}/start"])
+    fun startJob(@PathVariable id: UUID, @RequestBody(required = false) request: JobStartRequest?): Map<String, Any> =
         when {
-            jobSchedulerService.startJob(name = name, params = request?.params) ->
-                mapOf("message" to "Job started successfully", "jobName" to name)
-            else -> mapOf("error" to "Failed to start job", "jobName" to name)
+            jobSchedulerService.startJobById(id = id, params = request?.params) ->
+                mapOf("message" to "Job started successfully", "jobId" to id)
+            else -> mapOf("error" to "Failed to start job", "jobId" to id)
         }
 
-    @PutMapping(value = ["/{name}/stop"])
-    fun stopJob(@PathVariable name: String): Map<String, Any> =
+    @PutMapping(value = ["/{id}/stop"])
+    fun stopJob(@PathVariable id: UUID): Map<String, Any> =
         when {
-            jobSchedulerService.stopJob(name = name) -> mapOf("message" to "Job stopped successfully", "jobName" to name)
-            else -> mapOf("error" to "Failed to stop job", "jobName" to name)
+            jobSchedulerService.stopJobById(id = id) -> mapOf("message" to "Job stopped successfully", "jobId" to id)
+            else -> mapOf("error" to "Failed to stop job", "jobId" to id)
         }
 
-    @PutMapping(value = ["/{name}"])
-    fun updateJob(@PathVariable name: String, @RequestBody request: JobUpdateRequest): Map<String, Any> =
+    @PutMapping(value = ["/{id}"])
+    fun updateJob(@PathVariable id: UUID, @RequestBody request: JobUpdateRequest): Map<String, Any> =
         when {
-            jobSchedulerService.updateJob(name = name, cronExpression = request.cronExpression, triggerType = request.triggerType, newName = request.name) ->
-                mapOf("message" to "Job updated successfully", "jobName" to name)
-            else -> mapOf("error" to "Failed to update job", "jobName" to name)
+            jobSchedulerService.updateJobById(id = id, cronExpression = request.cronExpression, triggerType = request.triggerType, newName = request.name) ->
+                mapOf("message" to "Job updated successfully", "jobId" to id)
+            else -> mapOf("error" to "Failed to update job", "jobId" to id)
         }
 
-    @DeleteMapping(value = ["/{name}"])
-    fun removeJob(@PathVariable name: String): Map<String, Any> =
+    @DeleteMapping(value = ["/{id}"])
+    fun removeJob(@PathVariable id: UUID): Map<String, Any> =
         when {
-            jobSchedulerService.removeJob(name = name) -> mapOf("message" to "Job removed successfully", "jobName" to name)
-            else -> mapOf("error" to "Failed to remove job", "jobName" to name)
+            jobSchedulerService.removeJobById(id = id) -> mapOf("message" to "Job removed successfully", "jobId" to id)
+            else -> mapOf("error" to "Failed to remove job", "jobId" to id)
         }
 
     @PostMapping(value = ["/save"])

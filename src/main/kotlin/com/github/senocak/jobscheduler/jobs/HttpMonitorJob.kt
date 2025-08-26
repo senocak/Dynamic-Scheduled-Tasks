@@ -27,6 +27,5 @@ class HttpMonitorJob: JobTask() {
             }
         }
         log.info("Monitoring Result: $message")
-
     }
 }
