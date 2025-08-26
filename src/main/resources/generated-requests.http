@@ -10,12 +10,39 @@ GET {{baseUrl}}/jobs
 ### Get Job by ID
 GET {{baseUrl}}/jobs/{{id}}
 
-### Get Job by ID
-PUT {{baseUrl}}/jobs/881d188d-ad01-410d-bf65-752f665ef472/start
+### Start Job by ID for PING
+PUT {{baseUrl}}/jobs/881d188d-ad01-410d-bf65-752f665ef473/start
 Content-Type: Application/json
 
 {
   "params": {
     "host": "http://google.com"
+  }
+}
+
+### Start Job by ID for HttpMonitorJob
+PUT {{baseUrl}}/jobs/881d188d-ad01-410d-bf65-752f665ef474/start
+Content-Type: Application/json
+
+{
+  "params": {
+    "url": "http://google.com"
+  }
+}
+
+### Start Job by ID for TarihteBugunJob
+PUT {{baseUrl}}/jobs/881d188d-ad01-410d-bf65-752f665ef475/start
+Content-Type: Application/json
+
+{
+}
+
+### Start Job by ID for WeatherInformationJob
+PUT {{baseUrl}}/jobs/881d188d-ad01-410d-bf65-752f665ef476/start
+Content-Type: Application/json
+
+{
+  "params": {
+    "city": "Istanbul,TR"
   }
 }

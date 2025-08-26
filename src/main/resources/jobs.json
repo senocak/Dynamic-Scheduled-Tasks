@@ -1,64 +1,57 @@
 {
-  "jobs" : [
-    {
-      "id" : "881d188d-ad01-410d-bf65-752f665ef471",
-      "cronExpression" : "0 * * * * *",
-      "isRunning" : false,
-      "status" : "SCHEDULED",
-      "lastRunTime" : [ 2025, 8, 26, 12, 51, 0, 2440000 ],
-      "nextRunTime" : [ 2025, 8, 26, 13, 2 ],
-      "className" : "com.github.senocak.jobscheduler.jobs.DiskUsageJob",
-      "enabled" : true
-    },
-    {
-      "id" : "881d188d-ad01-410d-bf65-752f665ef472",
-      "cronExpression" : "0 * * * * *",
-      "isRunning" : false,
-      "status" : "SCHEDULED",
-      "lastRunTime" : [ 2025, 8, 26, 12, 51, 0, 2440000 ],
-      "nextRunTime" : [ 2025, 8, 26, 13, 36 ],
-      "className" : "com.github.senocak.jobscheduler.jobs.OperatingSystemJob",
-      "enabled" : true
-    },
-    {
-      "id" : "881d188d-ad01-410d-bf65-752f665ef473",
-      "cronExpression" : "0 */5 * * * *",
-      "isRunning" : false,
-      "status" : "FAILED",
-      "lastRunTime" : [ 2025, 8, 26, 13, 46, 11, 688926000 ],
-      "nextRunTime" : [ 2025, 8, 26, 13, 48 ],
-      "className" : "com.github.senocak.jobscheduler.jobs.PingJob",
-      "enabled" : false
-    },
-    {
-      "id" : "881d188d-ad01-410d-bf65-752f665ef474",
-      "cronExpression" : "0 */5 * * * *",
-      "isRunning" : false,
-      "status" : "FAILED",
-      "lastRunTime" : [ 2025, 8, 26, 13, 46, 11, 688926000 ],
-      "nextRunTime" : [ 2025, 8, 26, 13, 48 ],
-      "className" : "com.github.senocak.jobscheduler.jobs.HttpMonitorJob",
-      "enabled" : false
-    },
-    {
-      "id" : "881d188d-ad01-410d-bf65-752f665ef475",
-      "cronExpression" : "0 */5 * * * *",
-      "isRunning" : false,
-      "status" : "FAILED",
-      "lastRunTime" : [ 2025, 8, 26, 13, 46, 11, 688926000 ],
-      "nextRunTime" : [ 2025, 8, 26, 13, 48 ],
-      "className" : "com.github.senocak.jobscheduler.jobs.TarihteBugunJob",
-      "enabled" : false
-    },
-    {
-      "id" : "881d188d-ad01-410d-bf65-752f665ef476",
-      "cronExpression" : "0 */5 * * * *",
-      "isRunning" : false,
-      "status" : "FAILED",
-      "lastRunTime" : [ 2025, 8, 26, 13, 46, 11, 688926000 ],
-      "nextRunTime" : [ 2025, 8, 26, 13, 48 ],
-      "className" : "com.github.senocak.jobscheduler.jobs.WeatherInformationJob",
-      "enabled" : false
-    }
-  ]
+  "jobs" : [ {
+    "id" : "881d188d-ad01-410d-bf65-752f665ef471",
+    "cronExpression" : "0 * * * * *",
+    "isRunning" : false,
+    "status" : "SCHEDULED",
+    "lastRunTime" : [ 2025, 8, 26, 12, 51, 0, 2440000 ],
+    "nextRunTime" : [ 2025, 8, 26, 13, 2 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.DiskUsageJob",
+    "enabled" : true
+  }, {
+    "id" : "881d188d-ad01-410d-bf65-752f665ef472",
+    "cronExpression" : "0 * * * * *",
+    "isRunning" : false,
+    "status" : "SCHEDULED",
+    "lastRunTime" : [ 2025, 8, 26, 12, 51, 0, 2440000 ],
+    "nextRunTime" : [ 2025, 8, 26, 13, 52 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.OperatingSystemJob",
+    "enabled" : true
+  }, {
+    "id" : "881d188d-ad01-410d-bf65-752f665ef473",
+    "cronExpression" : "0 */5 * * * *",
+    "isRunning" : false,
+    "status" : "FAILED",
+    "lastRunTime" : [ 2025, 8, 26, 13, 46, 11, 688926000 ],
+    "nextRunTime" : [ 2025, 8, 26, 13, 48 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.PingJob",
+    "enabled" : false
+  }, {
+    "id" : "881d188d-ad01-410d-bf65-752f665ef474",
+    "cronExpression" : "0 */5 * * * *",
+    "isRunning" : false,
+    "status" : "FAILED",
+    "lastRunTime" : [ 2025, 8, 26, 13, 46, 11, 688926000 ],
+    "nextRunTime" : [ 2025, 8, 26, 13, 48 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.HttpMonitorJob",
+    "enabled" : false
+  }, {
+    "id" : "881d188d-ad01-410d-bf65-752f665ef475",
+    "cronExpression" : "0 */5 * * * *",
+    "isRunning" : false,
+    "status" : "FAILED",
+    "lastRunTime" : [ 2025, 8, 26, 13, 46, 11, 688926000 ],
+    "nextRunTime" : [ 2025, 8, 26, 13, 48 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.TarihteBugunJob",
+    "enabled" : false
+  }, {
+    "id" : "881d188d-ad01-410d-bf65-752f665ef476",
+    "cronExpression" : "0 */5 * * * *",
+    "isRunning" : false,
+    "status" : "COMPLETED",
+    "lastRunTime" : [ 2025, 8, 26, 14, 0, 26, 968918000 ],
+    "nextRunTime" : [ 2025, 8, 26, 14, 5 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.WeatherInformationJob",
+    "enabled" : false
+  } ]
 }
