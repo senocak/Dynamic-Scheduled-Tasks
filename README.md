@@ -36,6 +36,78 @@ This format is designed for clarity and portability, not high-volume logging. Fo
 - `TaskScheduler.schedule` with a `CronTrigger` executes the job on schedule.
 - Changing a job’s `cronExpression` via API cancels any prior schedule and registers a new one.
 
+### Core Logic Code Examples
+
+Job lifecycle wrapper (common logic) inside `JobTask`:
+```kotlin
+abstract class JobTask {
+    open var id: UUID = UUID.randomUUID()
+    open var cronExpression: String? = null
+    open var isRunning: Boolean = false
+    open var status: JobStatus = JobStatus.SCHEDULED
+    open var lastRunTime: LocalDateTime? = null
+    open var nextRunTime: LocalDateTime? = null
+    open var enabled: Boolean = false
+    val logs: MutableList<JobLogEntry> = mutableListOf()
+
+    protected abstract fun execute(params: Map<String, Any>? = null)
+
+    fun executes(params: Map<String, Any>? = null) {
+        isRunning = true
+        status = JobStatus.RUNNING
+        lastRunTime = LocalDateTime.now()
+        logs.add(JobLogEntry(timestamp = lastRunTime!!, level = "INFO", message = "START params=$params"))
+        try {
+            execute(params = params)
+            Thread.sleep(1_000)
+            status = JobStatus.COMPLETED
+            logs.add(JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = "COMPLETED"))
+        } catch (e: Exception) {
+            status = JobStatus.FAILED
+            logs.add(JobLogEntry(timestamp = LocalDateTime.now(), level = "ERROR", message = "FAILED ${e.message}"))
+        } finally {
+            isRunning = false
+        }
+    }
+}
+```
+
+Explanation:
+- Sets status/timestamps consistently before and after execution.
+- Centralizes success/failure logging so job implementations stay focused on business logic inside `execute`.
+- Guarantees `isRunning` is reset in `finally`, preventing stuck states.
+
+Scheduling a job and computing next run (in `JobSchedulerService`):
+```kotlin
+private fun scheduleJob(jobId: UUID, job: JobTask, cronExpression: String) {
+    val scheduledTask: ScheduledFuture<*>? = taskScheduler.schedule(
+        {
+            try {
+                job.executes()
+                calculateNextRunTime(job = job, cronExpression = cronExpression)
+            } catch (e: Exception) {
+                job.status = JobStatus.FAILED
+            }
+        },
+        CronTrigger(cronExpression)
+    )
+    scheduledTasks[jobId] = scheduledTask as ScheduledFuture<*>
+    job.status = JobStatus.SCHEDULED
+    calculateNextRunTime(job = job, cronExpression = cronExpression)
+}
+
+private fun calculateNextRunTime(job: JobTask, cronExpression: String) {
+    val now: LocalDateTime = LocalDateTime.now()
+    val cron: CronExpression = CronExpression.parse(cronExpression)
+    job.nextRunTime = cron.next(now)
+}
+```
+
+Explanation:
+- Uses Spring `TaskScheduler` with `CronTrigger` to register a recurring task.
+- After each run, computes and stores `nextRunTime` using `CronExpression` for accurate, time-zone-safe scheduling.
+- Cancels and replaces schedules safely when cron changes (see next section).
+
 ### Adding a New Job
 1. Create a class extending `JobTask` and annotate with `@Component`:
    - Override `execute(params)` with your business logic.
@@ -79,26 +151,6 @@ A Kotlin Spring Boot application that provides a dynamic job scheduling system w
 - **Job Lifecycle Management**: Start, stop, update, and remove jobs
 - **Real-time Status Tracking**: Monitor job status, last run time, and next scheduled run
 - **Thread-safe Operations**: Uses `ConcurrentHashMap` for thread-safe job storage
-
-## Project Structure
-```
-src/main/kotlin/com/example/jobscheduler/
-├── Application.kt                    # Main Spring Boot application
-├── config/
-│   └── SchedulingConfig.kt          # TaskScheduler configuration
-├── controller/
-│   └── JobController.kt             # REST API endpoints
-├── dto/
-│   └── JobRequest.kt                # API request/response DTOs
-├── jobs/
-│   ├── SampleJobOne.kt              # Example job implementation
-│   └── SampleJobTwo.kt              # Example job implementation
-├── model/
-│   ├── JobStatus.kt                 # Job status enum
-│   └── JobTask.kt                   # Job task interface
-└── service/
-    └── JobSchedulerService.kt       # Core job scheduling logic
-```
 
 ## Job Status
 - **SCHEDULED**: Job is registered and ready to run
