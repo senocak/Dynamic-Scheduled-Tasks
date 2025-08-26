@@ -29,9 +29,9 @@ class JobController(
         jobSchedulerService.getJobById(id = id) ?: throw NoSuchElementException("Job with id $id not found")
 
     @PutMapping(value = ["/{id}/start"])
-    fun startJob(@PathVariable id: UUID, @RequestBody(required = false) request: JobStartRequest?): Map<String, Any> =
+    fun startJob(@PathVariable id: UUID, @RequestBody request: JobStartRequest): Map<String, Any> =
         when {
-            jobSchedulerService.startJobById(id = id, params = request?.params) ->
+            jobSchedulerService.startJobById(id = id, params = request.params) ->
                 mapOf("message" to "Job started successfully", "jobId" to id)
             else -> mapOf("error" to "Failed to start job", "jobId" to id)
         }

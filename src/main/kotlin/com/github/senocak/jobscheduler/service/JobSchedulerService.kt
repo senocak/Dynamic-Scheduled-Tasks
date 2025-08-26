@@ -34,28 +34,43 @@ class JobSchedulerService(
         log.info("Initializing job scheduler...")
         val persistedJobs: List<JobPersistenceDto> = jobPersistenceService.loadJobsFromResources()
         val jobTaskBeans: Map<String, JobTask> = applicationContext.getBeansOfType(JobTask::class.java)
-        jobTaskBeans.forEach { (_: String, job: JobTask) ->
-            val persistedJob: JobPersistenceDto? = persistedJobs.find { it.className == job::class.java.name }
-            if (persistedJob != null && persistedJob.enabled) {
-                job.id = persistedJob.id
-                job.cronExpression = persistedJob.cronExpression
-                job.status = persistedJob.status
-                job.lastRunTime = persistedJob.lastRunTime
-                job.nextRunTime = persistedJob.nextRunTime
-                job.enabled = true
-                log.info("Applied persisted configuration for job: ${job::class.java.simpleName}")
-                registerJob(job = job)
+
+        persistedJobs.forEach { persistedJob: JobPersistenceDto ->
+            val jobTask: JobTask? = jobTaskBeans.values.find { job: JobTask -> job::class.java.name == persistedJob.className }
+            if (jobTask != null) {
+                jobTask.id = persistedJob.id
+                jobTask.cronExpression = persistedJob.cronExpression
+                jobTask.status = persistedJob.status
+                jobTask.lastRunTime = persistedJob.lastRunTime
+                jobTask.nextRunTime = persistedJob.nextRunTime
+                jobTask.enabled = persistedJob.enabled
+                registerJob(job = jobTask)
             }
         }
+//        jobTaskBeans.forEach { (_: String, job: JobTask) ->
+//            val persistedJob: JobPersistenceDto? = persistedJobs.find { it.className == job::class.java.name }
+//            if (persistedJob != null && persistedJob.enabled) {
+//                job.id = persistedJob.id
+//                job.cronExpression = persistedJob.cronExpression
+//                job.status = persistedJob.status
+//                job.lastRunTime = persistedJob.lastRunTime
+//                job.nextRunTime = persistedJob.nextRunTime
+//                job.enabled = persistedJob.enabled
+//                log.info("Applied persisted configuration for job: ${job::class.java.simpleName}")
+//            }
+//            registerJob(job = job)
+//        }
     }
 
     fun registerJob(job: JobTask) {
         jobs[job.id] = job
-        job.cronExpression?.let { cronExpression: String ->
-            scheduleJob(jobId = job.id, job = job, cronExpression = cronExpression)
+        if (job.enabled) {
+            job.cronExpression?.let { cronExpression: String ->
+                scheduleJob(jobId = job.id, job = job, cronExpression = cronExpression)
+            }
+            jobPersistenceService.updateJobInFile(job = job)
+            log.info("Registered job: ${job::class.java.simpleName} with id: ${job.id}")
         }
-        jobPersistenceService.updateJobInFile(job = job)
-        log.info("Registered job: ${job::class.java.simpleName} with id: ${job.id}")
     }
 
     fun getAllJobs(): List<JobResponse> =

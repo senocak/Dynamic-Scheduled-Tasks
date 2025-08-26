@@ -1,2 +1,21 @@
-###
-GET http://localhost:8080/jobs
+@baseUrl = http://localhost:8080
+
+### List Jobs
+GET {{baseUrl}}/jobs
+
+> {%
+    client.global.set("id", response.body[0].name.split(":")[1]);
+%}
+
+### Get Job by ID
+GET {{baseUrl}}/jobs/{{id}}
+
+### Get Job by ID
+PUT {{baseUrl}}/jobs/881d188d-ad01-410d-bf65-752f665ef472/start
+Content-Type: Application/json
+
+{
+  "params": {
+    "host": "http://google.com"
+  }
+}
