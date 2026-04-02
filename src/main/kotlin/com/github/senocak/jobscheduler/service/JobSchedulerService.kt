@@ -9,6 +9,7 @@ import com.github.senocak.jobscheduler.model.JobStatus
 import com.github.senocak.jobscheduler.model.TriggerType
 import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.scheduling.support.CronExpression
@@ -22,7 +23,7 @@ import java.util.concurrent.ScheduledFuture
 @Service
 class JobSchedulerService(
     private val applicationContext: ApplicationContext,
-    private val taskScheduler: TaskScheduler,
+    @Qualifier("taskScheduler") private val taskScheduler: TaskScheduler,
     private val jobPersistenceService: JobPersistenceService
 ) {
     private val log: Logger by logger()
@@ -39,6 +40,7 @@ class JobSchedulerService(
             val jobTask: JobTask? = jobTaskBeans.values.find { job: JobTask -> job::class.java.name == persistedJob.className }
             if (jobTask != null) {
                 jobTask.id = persistedJob.id
+                jobTask.name = persistedJob.className
                 jobTask.cronExpression = persistedJob.cronExpression
                 jobTask.status = persistedJob.status
                 jobTask.lastRunTime = persistedJob.lastRunTime
@@ -53,7 +55,7 @@ class JobSchedulerService(
         jobs[job.id] = job
         if (job.enabled) {
             job.cronExpression?.let { cronExpression: String ->
-                scheduleJob(jobId = job.id, job = job, cronExpression = cronExpression)
+                scheduleJob(job = job, cronExpression = cronExpression)
             }
             jobPersistenceService.updateJobInFile(job = job)
             log.info("Registered job: ${job::class.java.simpleName} with id: ${job.id}")
@@ -145,7 +147,7 @@ class JobSchedulerService(
             scheduledTasks[id]?.cancel(false)
             scheduledTasks.remove(id)
             job.cronExpression = finalCronExpression
-            finalCronExpression?.let { scheduleJob(jobId = id, job = job, cronExpression = it) }
+            finalCronExpression?.let { scheduleJob(job = job, cronExpression = it) }
         }
         jobPersistenceService.updateJobInFile(job = job)
         log.info("Updated job: ${job.id} with cron: $finalCronExpression")
@@ -177,7 +179,7 @@ class JobSchedulerService(
         jobPersistenceService.saveJobsToFile(mapForPersistence)
     }
 
-    private fun scheduleJob(jobId: UUID, job: JobTask, cronExpression: String) {
+    private fun scheduleJob(job: JobTask, cronExpression: String) {
         try {
             val scheduledTask: ScheduledFuture<*>? = taskScheduler.schedule(
                 {
@@ -185,18 +187,18 @@ class JobSchedulerService(
                         job.executes()
                         calculateNextRunTime(job = job, cronExpression = cronExpression)
                     } catch (e: Exception) {
-                        log.error("Scheduled job $jobId failed: ${e.message}", e)
+                        log.error("Scheduled job ${job.id} failed: ${e.message}", e)
                         job.status = JobStatus.FAILED
                     }
                 },
                 CronTrigger(cronExpression)
             )
-            scheduledTasks[jobId] = scheduledTask as ScheduledFuture<*>
+            scheduledTasks[job.id] = scheduledTask as ScheduledFuture<*>
             job.status = JobStatus.SCHEDULED
             calculateNextRunTime(job = job, cronExpression = cronExpression)
-            log.info("Scheduled job $jobId with cron: $cronExpression, next run: ${job.nextRunTime}")
+            log.info("Scheduled job ${job.id} with cron: $cronExpression, next run: ${job.nextRunTime}")
         } catch (e: Exception) {
-            log.error("Failed to schedule job $jobId with cron $cronExpression: ${e.message}", e)
+            log.error("Failed to schedule job ${job.id} with cron $cronExpression: ${e.message}", e)
         }
     }
 
@@ -206,10 +208,12 @@ class JobSchedulerService(
             val cronTrigger: CronExpression = CronExpression.parse(cronExpression)
             val nextRun: LocalDateTime? = cronTrigger.next(now)
             job.nextRunTime = nextRun
-            log.info("Calculated next run time: ${job.nextRunTime}")
+            log.info("Calculated next run for ${job.name} time: ${job.nextRunTime}")
         } catch (e: Exception) {
             log.error("Failed to calculate next run time: ${e.message}", e)
             job.nextRunTime = null
+        } finally {
+            jobPersistenceService.updateJobInFile(job = job)
         }
     }
 }

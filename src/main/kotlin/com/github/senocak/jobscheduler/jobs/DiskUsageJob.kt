@@ -11,7 +11,7 @@ class DiskUsageJob: JobTask() {
     private val CRITICAL_THRESHOLD = 95.0 // Critical warning when disk usage is above 95%
 
     override fun execute(params: Map<String, Any>?) {
-        Thread.sleep(20_000)
+        Thread.sleep(3_000)
         val diskUsageInfo: List<DiskInfo> = File.listRoots().map { root: File ->
             val totalSpace: Long = root.totalSpace
             val usableSpace: Long = root.usableSpace

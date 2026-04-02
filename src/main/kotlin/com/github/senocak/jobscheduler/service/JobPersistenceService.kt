@@ -50,7 +50,7 @@ class JobPersistenceService {
         }
 
     private fun mapLogs(job: JobTask): List<JobLogEntry> =
-        job.logs.map { (ts: LocalDateTime, msg: String) ->
+        job.logs.map { (ts: LocalDateTime, _: String, msg: String) ->
             val level: String = if (msg.startsWith(prefix = "FAILED")) "ERROR" else "INFO"
             JobLogEntry(timestamp = ts, level = level, message = msg)
         }
@@ -95,7 +95,7 @@ class JobPersistenceService {
                     nextRunTime = job.nextRunTime,
                     className = job::class.java.name,
                     enabled = job.enabled,
-                    logs = mapLogs(job)
+                    logs = mapLogs(job = job)
                 )
             } else {
                 existingJobs.add(JobPersistenceDto(
@@ -107,7 +107,7 @@ class JobPersistenceService {
                     nextRunTime = job.nextRunTime,
                     className = job::class.java.name,
                     enabled = job.enabled,
-                    logs = mapLogs(job)
+                    logs = mapLogs(job = job)
                 ))
             }
             val jobsFileDto = JobsFileDto(jobs = existingJobs)
@@ -117,7 +117,7 @@ class JobPersistenceService {
             Files.write(Paths.get(jobsFilePath), jsonContent.toByteArray())
             log.info("Updated job $job in file: $jobsFilePath")
         } catch (e: Exception) {
-            log.error("Failed to update job in file: ${e.message}", e)
+            log.error("Failed to update job $job in file: ${e.message}", e)
         }
     }
 

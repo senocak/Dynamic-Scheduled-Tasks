@@ -13,7 +13,7 @@ class PingJob : JobTask() {
             InetAddress.getByName(host).isReachable(3_000) -> "$host is reachable.".also { log.info(it) }
             else -> "$host is not reachable.".also { log.warn(it) }
         }
-        log.info("Response:\n$message")
+        log.info("Ping:\n$message")
         logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = message))
     }
 }

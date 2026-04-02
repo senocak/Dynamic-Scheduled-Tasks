@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class JobLogEntry(
-    val timestamp: LocalDateTime,
+    val timestamp: LocalDateTime = LocalDateTime.now(),
     val level: String,
     val message: String
 )

@@ -1,8 +1,6 @@
-# Server configuration
 server:
-  port: 8080
+  port: 8090
 
-# Logging configuration
 logging:
   level:
     com:
@@ -12,8 +10,19 @@ logging:
       springframework:
         scheduling: DEBUG
 
-# Jackson configuration for Kotlin
 spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+  threads:
+    virtual:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,refresh,mappings
+  endpoint:
+    health:
+      show-details: always

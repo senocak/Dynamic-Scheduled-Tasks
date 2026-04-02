@@ -7,7 +7,7 @@
     "lastRunTime" : [ 2025, 8, 26, 12, 51, 0, 2440000 ],
     "nextRunTime" : [ 2025, 8, 26, 13, 2 ],
     "className" : "com.github.senocak.jobscheduler.jobs.DiskUsageJob",
-    "enabled" : true,
+    "enabled" : false,
     "logs" : [ ]
   }, {
     "id" : "881d188d-ad01-410d-bf65-752f665ef472",
@@ -17,7 +17,7 @@
     "lastRunTime" : [ 2025, 8, 26, 12, 51, 0, 2440000 ],
     "nextRunTime" : [ 2025, 8, 26, 14, 35 ],
     "className" : "com.github.senocak.jobscheduler.jobs.OperatingSystemJob",
-    "enabled" : true,
+    "enabled" : false,
     "logs" : [ ]
   }, {
     "id" : "881d188d-ad01-410d-bf65-752f665ef473",
@@ -71,5 +71,25 @@
       "level" : "INFO",
       "message" : "INFO"
     } ]
+  }, {
+    "id" : "881d188d-ad01-410d-bf65-752f665ef477",
+    "cronExpression" : "0 * * * * *",
+    "isRunning" : false,
+    "status" : "COMPLETED",
+    "lastRunTime" : [ 2026, 4, 2, 8, 33, 0, 6505000 ],
+    "nextRunTime" : [ 2026, 4, 2, 8, 34 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.ProcessInfoJob",
+    "enabled" : true,
+    "logs" : []
+  }, {
+    "id" : "881d188d-ad01-410d-bf65-752f665ef477",
+    "cronExpression" : "0 * * * * *",
+    "isRunning" : false,
+    "status" : "SCHEDULED",
+    "lastRunTime" : [ 2025, 8, 26, 14, 38, 42, 462471000 ],
+    "nextRunTime" : [ 2026, 4, 1, 19, 33 ],
+    "className" : "com.github.senocak.jobscheduler.jobs.ProcessInfoJob",
+    "enabled" : true,
+    "logs" : [ ]
   } ]
 }

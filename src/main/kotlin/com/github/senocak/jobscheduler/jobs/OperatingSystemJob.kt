@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component
 import java.text.DecimalFormat
 import com.sun.management.OperatingSystemMXBean
 import java.lang.management.ManagementFactory
-import java.time.LocalDateTime
 
 @Component
 class OperatingSystemJob : JobTask() {
@@ -17,7 +16,7 @@ class OperatingSystemJob : JobTask() {
     private val tb: Long = gb * 1000
 
     override fun execute(params: Map<String, Any>?) {
-        Thread.sleep(20_000)
+        Thread.sleep(3_000)
         val runtime: Runtime = Runtime.getRuntime()
         val performance = Performance(
             timestamp = System.currentTimeMillis(),
@@ -33,8 +32,10 @@ class OperatingSystemJob : JobTask() {
             maxMemory = toHumanReadableSIPrefixes(size = runtime.maxMemory()),
             freeMemory = toHumanReadableSIPrefixes(size = runtime.freeMemory())
         )
-        log.info("Performance:\n$performance")
-        logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = performance.toString()))
+        "Performance:\n$performance".also { it: String ->
+            log.info(it)
+            logs.add(element = JobLogEntry(level = "INFO", message = it))
+        }
     }
 
     private fun toHumanReadableSIPrefixes(size: Long): String =

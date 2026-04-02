@@ -11,6 +11,7 @@ abstract class JobTask {
     open var id: UUID = UUID.randomUUID()
     protected val log: Logger by logger()
     open var cronExpression: String? = null
+    open var name: String? = null
     open var isRunning: Boolean = false
     open var status: JobStatus = JobStatus.SCHEDULED
     open var lastRunTime: LocalDateTime? = null
@@ -24,7 +25,7 @@ abstract class JobTask {
         isRunning = true
         status = JobStatus.RUNNING
         lastRunTime = LocalDateTime.now()
-        log.info("Running Job at $lastRunTime with params: $params, at $lastRunTime")
+        log.info("Running Job `$name` at $lastRunTime with params: $params, at $lastRunTime")
         logs.add(element = JobLogEntry(timestamp = lastRunTime!!, level = "INFO", message = "START params=$params"))
         try {
             execute(params = params)
@@ -41,5 +42,5 @@ abstract class JobTask {
     }
 
     override fun toString(): String =
-        "JobTask(id=$id, log=$log, cronExpression=$cronExpression, isRunning=$isRunning, status=$status, lastRunTime=$lastRunTime, nextRunTime=$nextRunTime)"
+        "JobTask(id=$id, log=$log, name=$name, cronExpression=$cronExpression, isRunning=$isRunning, status=$status, lastRunTime=$lastRunTime, nextRunTime=$nextRunTime)"
 }
