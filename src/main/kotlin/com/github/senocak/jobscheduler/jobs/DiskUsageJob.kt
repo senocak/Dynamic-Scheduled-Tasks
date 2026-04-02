@@ -1,9 +1,7 @@
 package com.github.senocak.jobscheduler.jobs
 
-import com.github.senocak.jobscheduler.dto.JobLogEntry
 import org.springframework.stereotype.Component
 import java.io.File
-import java.time.LocalDateTime
 
 @Component
 class DiskUsageJob: JobTask() {
@@ -34,7 +32,7 @@ class DiskUsageJob: JobTask() {
         val message: String = diskUsageInfo.joinToString(separator = "\n") { info: DiskInfo ->
             "Path: ${info.path}, Total: ${info.totalSpace}, Used: ${info.usedSpace}, Available: ${info.usableSpace}, Usage: ${info.usagePercentage}% "
         }
-        logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = message))
+        addLog(level = "INFO", message = message)
         log.info("Disk Usage Information:\n$message")
     }
 

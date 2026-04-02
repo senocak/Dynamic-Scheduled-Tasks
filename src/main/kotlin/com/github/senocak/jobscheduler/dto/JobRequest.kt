@@ -21,7 +21,7 @@ data class JobResponse(
     val lastRunTime: LocalDateTime?,
     val nextRunTime: LocalDateTime?,
     val enabled: Boolean,
-    val logs: MutableList<JobLogEntry> = mutableListOf()
+    val runs: List<JobRun> = emptyList()
 )
 
 data class TriggerTypeResponse(

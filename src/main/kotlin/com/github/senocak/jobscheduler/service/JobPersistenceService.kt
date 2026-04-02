@@ -1,7 +1,7 @@
 package com.github.senocak.jobscheduler.service
 
-import com.github.senocak.jobscheduler.dto.JobLogEntry
 import com.github.senocak.jobscheduler.dto.JobPersistenceDto
+import com.github.senocak.jobscheduler.dto.JobRun
 import com.github.senocak.jobscheduler.dto.JobsFileDto
 import com.github.senocak.jobscheduler.logger
 import com.github.senocak.jobscheduler.jobs.JobTask
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -49,11 +48,7 @@ class JobPersistenceService {
             emptyList()
         }
 
-    private fun mapLogs(job: JobTask): List<JobLogEntry> =
-        job.logs.map { (ts: LocalDateTime, _: String, msg: String) ->
-            val level: String = if (msg.startsWith(prefix = "FAILED")) "ERROR" else "INFO"
-            JobLogEntry(timestamp = ts, level = level, message = msg)
-        }
+    private fun mapRuns(job: JobTask): List<JobRun> = job.runs
 
     fun saveJobsToFile(jobs: Map<String, JobTask>) {
         try {
@@ -67,7 +62,7 @@ class JobPersistenceService {
                     nextRunTime = job.nextRunTime,
                     className = job::class.java.name,
                     enabled = job.enabled,
-                    logs = mapLogs(job = job)
+                    runs = mapRuns(job = job)
                 )
             }
             val jobsFileDto = JobsFileDto(jobs = jobDtos)
@@ -95,7 +90,7 @@ class JobPersistenceService {
                     nextRunTime = job.nextRunTime,
                     className = job::class.java.name,
                     enabled = job.enabled,
-                    logs = mapLogs(job = job)
+                    runs = mapRuns(job = job)
                 )
             } else {
                 existingJobs.add(JobPersistenceDto(
@@ -107,7 +102,7 @@ class JobPersistenceService {
                     nextRunTime = job.nextRunTime,
                     className = job::class.java.name,
                     enabled = job.enabled,
-                    logs = mapLogs(job = job)
+                    runs = mapRuns(job = job)
                 ))
             }
             val jobsFileDto = JobsFileDto(jobs = existingJobs)

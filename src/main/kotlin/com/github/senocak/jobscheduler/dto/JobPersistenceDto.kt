@@ -11,6 +11,11 @@ data class JobLogEntry(
     val message: String
 )
 
+data class JobRun(
+    val startTime: LocalDateTime,
+    val logs: MutableList<JobLogEntry> = mutableListOf()
+)
+
 data class JobPersistenceDto(
     val id: UUID,
     val cronExpression: String?,
@@ -21,7 +26,7 @@ data class JobPersistenceDto(
     @JsonProperty("className")
     val className: String,
     val enabled: Boolean,
-    val logs: List<JobLogEntry> = emptyList()
+    val runs: List<JobRun> = emptyList()
 )
 
 data class JobsFileDto(

@@ -1,9 +1,7 @@
 package com.github.senocak.jobscheduler.jobs
 
-import com.github.senocak.jobscheduler.dto.JobLogEntry
 import org.springframework.stereotype.Component
 import java.net.InetAddress
-import java.time.LocalDateTime
 
 @Component
 class PingJob : JobTask() {
@@ -14,6 +12,6 @@ class PingJob : JobTask() {
             else -> "$host is not reachable.".also { log.warn(it) }
         }
         log.info("Ping:\n$message")
-        logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = message))
+        addLog(level = "INFO", message = message)
     }
 }

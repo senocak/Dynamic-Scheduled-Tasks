@@ -1,6 +1,7 @@
 package com.github.senocak.jobscheduler.jobs
 
 import com.github.senocak.jobscheduler.dto.JobLogEntry
+import com.github.senocak.jobscheduler.dto.JobRun
 import com.github.senocak.jobscheduler.logger
 import com.github.senocak.jobscheduler.model.JobStatus
 import org.slf4j.Logger
@@ -17,7 +18,8 @@ abstract class JobTask {
     open var lastRunTime: LocalDateTime? = null
     open var nextRunTime: LocalDateTime? = null
     open var enabled: Boolean = false
-    val logs: MutableList<JobLogEntry> = mutableListOf()
+    val runs: MutableList<JobRun> = mutableListOf()
+    protected var currentRun: JobRun? = null
 
     protected abstract fun execute(params: Map<String, Any>? = null)
 
@@ -25,20 +27,26 @@ abstract class JobTask {
         isRunning = true
         status = JobStatus.RUNNING
         lastRunTime = LocalDateTime.now()
+        currentRun = JobRun(startTime = lastRunTime!!)
+        runs.add(currentRun!!)
         log.info("Running Job `$name` at $lastRunTime with params: $params, at $lastRunTime")
-        logs.add(element = JobLogEntry(timestamp = lastRunTime!!, level = "INFO", message = "START params=$params"))
+        currentRun!!.logs.add(element = JobLogEntry(timestamp = lastRunTime!!, level = "INFO", message = "START params=$params"))
         try {
             execute(params = params)
             Thread.sleep(1_000)
             status = JobStatus.COMPLETED
-            logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = "COMPLETED"))
+            currentRun!!.logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "INFO", message = "COMPLETED"))
         } catch (e: Exception) {
             status = JobStatus.FAILED
             log.error("Job OperatingSystemJob failed: ${e.message}")
-            logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "ERROR", message = "FAILED ${e.message}"))
+            currentRun!!.logs.add(element = JobLogEntry(timestamp = LocalDateTime.now(), level = "ERROR", message = "FAILED ${e.message}"))
         } finally {
             isRunning = false
         }
+    }
+
+    protected fun addLog(level: String, message: String) {
+        currentRun?.logs?.add(JobLogEntry(level = level, message = message))
     }
 
     override fun toString(): String =

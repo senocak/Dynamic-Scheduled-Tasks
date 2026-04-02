@@ -1,6 +1,5 @@
 package com.github.senocak.jobscheduler.jobs
 
-import com.github.senocak.jobscheduler.dto.JobLogEntry
 import org.springframework.stereotype.Component
 import java.text.DecimalFormat
 import com.sun.management.OperatingSystemMXBean
@@ -34,7 +33,7 @@ class OperatingSystemJob : JobTask() {
         )
         "Performance:\n$performance".also { it: String ->
             log.info(it)
-            logs.add(element = JobLogEntry(level = "INFO", message = it))
+            addLog(level = "INFO", message = it)
         }
     }
 
