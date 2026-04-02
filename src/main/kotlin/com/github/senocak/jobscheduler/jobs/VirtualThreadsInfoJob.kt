@@ -1,5 +1,6 @@
 package com.github.senocak.jobscheduler.jobs
 
+import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.logging.LoggingMeterRegistry
 import io.micrometer.java21.instrument.binder.jdk.VirtualThreadMetrics
@@ -19,7 +20,7 @@ class VirtualThreadsInfoJob(
     }
 
     private fun getMetric(gaugeName: String): Double {
-        val meter = meterRegistry.find(gaugeName).gauge()
+        val meter: Gauge? = meterRegistry.find(gaugeName).gauge()
         return if (meter != null) meter.value() else 0.0
     }
 }
