@@ -67,17 +67,17 @@
     "lastRunTime" : [ 2026, 4, 2, 10, 33, 0, 977000 ],
     "nextRunTime" : [ 2026, 4, 2, 10, 34 ],
     "className" : "com.github.senocak.jobscheduler.jobs.VirtualThreadsInfoJob",
-    "enabled" : true,
+    "enabled" : false,
     "runs" : [ ]
   }, {
     "id" : "881d188d-ad01-410d-bf65-752f665ef478",
-    "cronExpression" : "0 * * * * *",
+    "cronExpression" : null,
     "isRunning" : false,
     "status" : "COMPLETED",
-    "lastRunTime" : [ 2026, 4, 2, 10, 32, 0, 992000 ],
+    "lastRunTime" : [ 2026, 4, 2, 14, 42, 28, 129327000 ],
     "nextRunTime" : [ 2026, 4, 2, 10, 33 ],
     "className" : "com.github.senocak.jobscheduler.jobs.ProcessInfoJob",
-    "enabled" : true,
+    "enabled" : false,
     "runs" : [ ]
   } ]
 }
