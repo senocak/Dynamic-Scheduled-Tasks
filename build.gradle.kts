@@ -1,10 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.springframework.boot") version "3.5.13"
-    id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
+    id("org.springframework.boot") version "3.5.13"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "com.github.senocak"
@@ -12,6 +12,9 @@ version = "0.0.1"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 repositories {

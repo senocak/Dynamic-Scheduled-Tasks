@@ -1,5 +1,5 @@
 server:
-  port: 8090
+  port: ${SERVER_PORT:8090}
 
 logging:
   level:
@@ -26,3 +26,8 @@ management:
   endpoint:
     health:
       show-details: always
+  health: # k8s auto probe added
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true

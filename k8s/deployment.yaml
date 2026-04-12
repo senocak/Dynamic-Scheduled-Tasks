@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-app
+  template:
+    metadata:
+      labels:
+        app: springboot-app
+    spec:
+      containers:
+        - name: springboot-app
+          image: springboot-kotlin-k8s
+          imagePullPolicy: Never
+          env:
+            - name: JAVA_OPTS
+              value: "-Xms256m -Xmx512m"
+            - name: SERVER_PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080

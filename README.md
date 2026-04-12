@@ -170,3 +170,7 @@ A Kotlin Spring Boot application that provides a dynamic job scheduling system w
 - **Auto-discovery**: Uses Spring's `ApplicationContext` to find `JobTask` beans
 - **Error Handling**: Comprehensive error handling with proper status updates
 - **Logging**: Structured logging with SLF4J
+
+## Run on K8S
+### docker build -t springboot-kotlin-k8s -f Dockerfile .
+### kubectl apply -f k8s/.
