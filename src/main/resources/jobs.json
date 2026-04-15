@@ -71,13 +71,13 @@
     "runs" : [ ]
   }, {
     "id" : "881d188d-ad01-410d-bf65-752f665ef478",
-    "cronExpression" : null,
+    "cronExpression" : "0 * * * * *",
     "isRunning" : false,
     "status" : "COMPLETED",
     "lastRunTime" : [ 2026, 4, 2, 14, 42, 28, 129327000 ],
     "nextRunTime" : [ 2026, 4, 2, 10, 33 ],
     "className" : "com.github.senocak.jobscheduler.jobs.ProcessInfoJob",
-    "enabled" : false,
+    "enabled" : true,
     "runs" : [ ]
   } ]
 }

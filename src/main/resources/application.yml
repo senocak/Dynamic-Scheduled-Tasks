@@ -26,8 +26,8 @@ management:
   endpoint:
     health:
       show-details: always
-  health: # k8s auto probe added
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
+#  health: # k8s auto probe added
+#    livenessstate:
+#      enabled: true
+#    readinessstate:
+#      enabled: true

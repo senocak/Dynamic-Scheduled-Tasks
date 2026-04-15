@@ -2,3 +2,4 @@ build
 .gradle
 gradle
 .idea
+frontend/node_modules
