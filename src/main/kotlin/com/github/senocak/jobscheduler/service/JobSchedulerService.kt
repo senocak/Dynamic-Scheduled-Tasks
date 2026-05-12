@@ -7,37 +7,40 @@ import com.github.senocak.jobscheduler.jobs.JobTask
 import com.github.senocak.jobscheduler.logger
 import com.github.senocak.jobscheduler.model.JobStatus
 import com.github.senocak.jobscheduler.model.TriggerType
-import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
+import org.springframework.aop.support.AopUtils
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
+import org.springframework.context.event.EventListener
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.scheduling.support.CronExpression
 import org.springframework.scheduling.support.CronTrigger
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ScheduledFuture
 
 @Service
 class JobSchedulerService(
     private val applicationContext: ApplicationContext,
-    @Qualifier("taskScheduler") private val taskScheduler: TaskScheduler,
+    @Qualifier(value = "taskScheduler") private val taskScheduler: TaskScheduler,
     private val jobPersistenceService: JobPersistenceService
 ) {
     private val log: Logger by logger()
     private val jobs: ConcurrentHashMap<UUID, JobTask> = ConcurrentHashMap()
     private val scheduledTasks: ConcurrentHashMap<UUID, ScheduledFuture<*>> = ConcurrentHashMap()
 
-    @PostConstruct
+    @EventListener(value = [ApplicationReadyEvent::class])
     fun initializeJobs() {
         log.info("Initializing job scheduler...")
         val persistedJobs: List<JobPersistenceDto> = jobPersistenceService.loadJobsFromResources()
         val jobTaskBeans: Map<String, JobTask> = applicationContext.getBeansOfType(JobTask::class.java)
 
         persistedJobs.forEach { persistedJob: JobPersistenceDto ->
-            val jobTask: JobTask? = jobTaskBeans.values.find { job: JobTask -> job::class.java.name == persistedJob.className }
+            val jobTask: JobTask? = jobTaskBeans.values
+                .find { job: JobTask -> AopUtils.getTargetClass(job).name == persistedJob.className }
             if (jobTask != null) {
                 jobTask.id = persistedJob.id
                 jobTask.name = persistedJob.className

@@ -74,8 +74,8 @@
     "cronExpression" : "0 * * * * *",
     "isRunning" : false,
     "status" : "COMPLETED",
-    "lastRunTime" : [ 2026, 4, 2, 14, 42, 28, 129327000 ],
-    "nextRunTime" : [ 2026, 4, 2, 10, 33 ],
+    "lastRunTime" : [ 2026, 4, 15, 20, 14, 15, 33226000 ],
+    "nextRunTime" : [ 2026, 4, 15, 20, 15 ],
     "className" : "com.github.senocak.jobscheduler.jobs.ProcessInfoJob",
     "enabled" : true,
     "runs" : [ ]

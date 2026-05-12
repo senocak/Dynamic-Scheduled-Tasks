@@ -1,7 +1,7 @@
 package com.github.senocak.jobscheduler.service
 
 import com.github.senocak.jobscheduler.dto.JobPersistenceDto
-import com.github.senocak.jobscheduler.dto.JobRun
+import org.springframework.aop.support.AopUtils
 import com.github.senocak.jobscheduler.dto.JobsFileDto
 import com.github.senocak.jobscheduler.logger
 import com.github.senocak.jobscheduler.jobs.JobTask
@@ -48,8 +48,6 @@ class JobPersistenceService {
             emptyList()
         }
 
-    private fun mapRuns(job: JobTask): List<JobRun> = job.runs
-
     fun saveJobsToFile(jobs: Map<String, JobTask>) {
         try {
             val jobDtos: List<JobPersistenceDto> = jobs.map { (_: String, job: JobTask) ->
@@ -62,7 +60,7 @@ class JobPersistenceService {
                     nextRunTime = job.nextRunTime,
                     className = job::class.java.name,
                     enabled = job.enabled,
-                    runs = mapRuns(job = job)
+                    runs = job.runs
                 )
             }
             val jobsFileDto = JobsFileDto(jobs = jobDtos)
@@ -80,30 +78,21 @@ class JobPersistenceService {
         try {
             val existingJobs: MutableList<JobPersistenceDto> = loadJobsFromResources().toMutableList()
             val jobIndex: Int = existingJobs.indexOfFirst { it.id == job.id }
+            val jobPersistenceDto = JobPersistenceDto(
+                id = job.id,
+                cronExpression = job.cronExpression,
+                isRunning = job.isRunning,
+                status = job.status,
+                lastRunTime = job.lastRunTime,
+                nextRunTime = job.nextRunTime,
+                className = AopUtils.getTargetClass(job).name,
+                enabled = job.enabled,
+                runs = job.runs
+            )
             if (jobIndex != -1) {
-                existingJobs[jobIndex] = JobPersistenceDto(
-                    id = job.id,
-                    cronExpression = job.cronExpression,
-                    isRunning = job.isRunning,
-                    status = job.status,
-                    lastRunTime = job.lastRunTime,
-                    nextRunTime = job.nextRunTime,
-                    className = job::class.java.name,
-                    enabled = job.enabled,
-                    runs = mapRuns(job = job)
-                )
+                existingJobs[jobIndex] = jobPersistenceDto
             } else {
-                existingJobs.add(JobPersistenceDto(
-                    id = job.id,
-                    cronExpression = job.cronExpression,
-                    isRunning = job.isRunning,
-                    status = job.status,
-                    lastRunTime = job.lastRunTime,
-                    nextRunTime = job.nextRunTime,
-                    className = job::class.java.name,
-                    enabled = job.enabled,
-                    runs = mapRuns(job = job)
-                ))
+                existingJobs.add(element = jobPersistenceDto)
             }
             val jobsFileDto = JobsFileDto(jobs = existingJobs)
             val jsonContent: String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jobsFileDto)

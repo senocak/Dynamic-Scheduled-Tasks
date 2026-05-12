@@ -4,8 +4,9 @@ server:
 logging:
   level:
     com:
-      example:
-        jobscheduler: INFO
+      github:
+        senocak:
+          jobscheduler: INFO
     org:
       springframework:
         scheduling: DEBUG

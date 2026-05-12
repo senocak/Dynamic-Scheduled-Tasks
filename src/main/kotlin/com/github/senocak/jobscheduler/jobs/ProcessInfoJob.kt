@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ProcessInfoJob: JobTask() {
-    override fun execute(params: Map<String, Any>?) {
+    public override fun execute(params: Map<String, Any>?) {
         val pinfo: ProcessInfo = ProcessInfo()
         "Owner: ${pinfo.owner}, Pid: ${pinfo.pid}, ParentPId: ${pinfo.parentPid}, CPU: ${pinfo.cpus}".also { it: String ->
             log.info(it)

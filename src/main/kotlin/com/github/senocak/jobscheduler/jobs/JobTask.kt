@@ -18,12 +18,12 @@ abstract class JobTask {
     open var lastRunTime: LocalDateTime? = null
     open var nextRunTime: LocalDateTime? = null
     open var enabled: Boolean = false
-    val runs: MutableList<JobRun> = mutableListOf()
-    protected var currentRun: JobRun? = null
+    open val runs: MutableList<JobRun> = mutableListOf()
+    open var currentRun: JobRun? = null
 
     protected abstract fun execute(params: Map<String, Any>? = null)
 
-    fun executes(params: Map<String, Any>? = null) {
+    open fun executes(params: Map<String, Any>? = null) {
         isRunning = true
         status = JobStatus.RUNNING
         lastRunTime = LocalDateTime.now()
