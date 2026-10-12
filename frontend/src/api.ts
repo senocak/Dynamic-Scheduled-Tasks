@@ -1,5 +1,5 @@
 // API client for Job Scheduler backend
-import axios, {AxiosInstance} from 'axios'
+import axios, { AxiosInstance } from 'axios'
 
 const API_BASE_URL: string = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8090';
 
@@ -47,8 +47,22 @@ export interface JobLog {
   message: string;
 }
 
-export interface JobUpdateParams {
+export interface JobStartParams {
   params: Record<string, any>;
+}
+
+// Matches backend JobUpdateRequest (NOT params)
+export interface JobScheduleUpdate {
+  cronExpression?: string;
+  triggerType?: string;
+  name?: string;
+}
+
+// Matches backend TriggerTypeResponse
+export interface TriggerType {
+  displayName: string;
+  cronExpression: string;
+  description: string;
 }
 
 function extractIdFromName(name?: string): string | undefined {
@@ -59,7 +73,7 @@ function extractIdFromName(name?: string): string | undefined {
 }
 
 function convertTimestamp(raw: any): string | null {
-  // raw can be ISO string or an array like [year, month, day, hour, minute, second, nanos]
+  // Backend may return an ISO string or an array like [year, month, day, hour, minute, second, nanos]
   if (!raw)
     return null;
   if (typeof raw === 'string')
@@ -73,7 +87,6 @@ function convertTimestamp(raw: any): string | null {
     const second: any = raw[5] ?? 0;
     const nanos: any = raw[6] ?? 0;
     const millisFromNanos: number = Math.round(nanos / 1e6);
-    // Construct a Date in local timezone (use ISO by creating Date.UTC)
     const date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisFromNanos));
     return date.toISOString();
   }
@@ -115,30 +128,37 @@ function toJob(raw: any): Job {
   };
 }
 
+async function fetchJob(id: string): Promise<Job> {
+  const res = await client.get(`/jobs/${id}`);
+  return toJob(res.data);
+}
+
+// Mutation endpoints return {message} or {error} (HTTP 200), not a Job.
+// Surface `error` as a rejection, then re-fetch the real job state.
+async function mutateJob(id: string, path: string, body?: unknown): Promise<Job> {
+  const res = await client.put(path, body ?? {});
+  const data = res.data;
+  if (data && typeof data === 'object' && !Array.isArray(data) && (data as any).error)
+    throw new Error(String((data as any).error));
+  return fetchJob(id);
+}
+
 export const api = {
   listJobs: async (): Promise<Job[]> => {
     const res = await client.get(`/jobs`);
     const data = res.data as any[];
     return Array.isArray(data) ? data.map(toJob) : [];
   },
-  getJob: async (id: string): Promise<Job> => {
-    const res = await client.get(`/jobs/${id}`);
-    return toJob(res.data);
-  },
-  updateJob: async (id: string, params: JobUpdateParams): Promise<Job> => {
-    const res = await client.put(`/jobs/${id}`, params);
-    return toJob(res.data);
-  },
-  startJob: async (id: string, params: JobUpdateParams): Promise<Job> => {
-    const res = await client.put(`/jobs/${id}/start`, params);
-    return toJob(res.data);
-  },
-  stopJob: async (id: string): Promise<Job> => {
-    const res = await client.put(`/jobs/${id}/stop`);
-    return toJob(res.data);
-  },
-  listTriggers: async (): Promise<any[]> => {
+  getJob: fetchJob,
+  updateJob: (id: string, update: JobScheduleUpdate): Promise<Job> =>
+    mutateJob(id, `/jobs/${id}`, update),
+  startJob: (id: string, params: JobStartParams): Promise<Job> =>
+    mutateJob(id, `/jobs/${id}/start`, params),
+  stopJob: (id: string): Promise<Job> =>
+    mutateJob(id, `/jobs/${id}/stop`),
+  listTriggers: async (): Promise<TriggerType[]> => {
     const res = await client.get(`/jobs/triggers`);
-    return res.data;
+    const data = res.data as any[];
+    return Array.isArray(data) ? data : [];
   },
 };

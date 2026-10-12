@@ -67,7 +67,7 @@ class JobSchedulerService(
 
     fun getAllJobs(): List<JobResponse> =
         jobs.map { (id: UUID, job: JobTask) ->
-            val simpleName: String = job::class.java.simpleName
+            val simpleName: String = AopUtils.getTargetClass(job).simpleName
             JobResponse(
                 name = "$simpleName:$id",
                 cronExpression = job.cronExpression,
@@ -82,7 +82,7 @@ class JobSchedulerService(
 
     fun getJobById(id: UUID): JobResponse? {
         val job: JobTask = jobs[id] ?: return null
-        val simpleName: String = job::class.java.simpleName
+        val simpleName: String = AopUtils.getTargetClass(job).simpleName
         return JobResponse(
             name = "$simpleName:${job.id}",
             cronExpression = job.cronExpression,
@@ -146,12 +146,17 @@ class JobSchedulerService(
             }
             else -> cronExpression
         }
-        if (finalCronExpression != job.cronExpression) {
+        // Reschedule when the cron changed, or when a cron exists but the job is not scheduled
+        // (e.g. it was stopped) so updating the schedule re-activates the job.
+        val needsReschedule: Boolean = finalCronExpression != job.cronExpression ||
+            (finalCronExpression != null && scheduledTasks[id] == null)
+        if (needsReschedule) {
             scheduledTasks[id]?.cancel(false)
             scheduledTasks.remove(id)
             job.cronExpression = finalCronExpression
             finalCronExpression?.let { scheduleJob(job = job, cronExpression = it) }
         }
+        job.enabled = finalCronExpression != null
         jobPersistenceService.updateJobInFile(job = job)
         log.info("Updated job: ${job.id} with cron: $finalCronExpression")
         return true

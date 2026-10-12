@@ -13,8 +13,13 @@ function App(): React.JSX.Element {
     <Router>
       <div className="App">
         <header className="navbar">
-          <Link to="/">Jobs</Link>
-          <button className="button" onClick={(): void => setShowTriggers(true)} style={{ marginLeft: 12 }}>Triggers</button>
+          <Link to="/" className="brand">Job Scheduler</Link>
+          <nav className="nav-links">
+            <Link to="/">Jobs</Link>
+            <button className="button nav-button" onClick={(): void => setShowTriggers(true)}>
+              Triggers
+            </button>
+          </nav>
         </header>
         <main className="container">
           <Routes>
@@ -23,8 +28,8 @@ function App(): React.JSX.Element {
           </Routes>
         </main>
         {showTriggers && (
-          <Modal onClose={(): void => setShowTriggers(false)} title="Job Triggers">
-            <Triggers onClose={(): void => setShowTriggers(false)} />
+          <Modal onClose={(): void => setShowTriggers(false)} title="Available Trigger Presets">
+            <Triggers />
           </Modal>
         )}
       </div>

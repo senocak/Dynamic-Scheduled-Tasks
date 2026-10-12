@@ -4,3 +4,4 @@ gradle
 .idea
 frontend/node_modules
 .kotlin
+**/jobs.json
